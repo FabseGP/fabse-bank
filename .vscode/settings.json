@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "tm4c123gh6pm.h": "c",
+        "sw1_interrupt.h": "c",
+        "stdint.h": "c",
+        "cstdlib": "c",
+        "export": "c",
+        "cstdint": "cpp"
+    }
+}

@@ -53,7 +53,13 @@ void init_lcd() {
 	 *   Function : See module specification (.h-file)
 	 *****************************************************************************/
 
-	SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOC | SYSCTL_RCGC2_GPIOD; // enable gpio ports C and D
+	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOC) {
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOC;
+	}
+
+	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOD) {
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOD;
+	} // enable gpio ports C and D
 
 	// D4 - D7 as outputs
 	GPIO_PORTC_DIR_R |= 0xF0;
