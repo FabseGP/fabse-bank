@@ -51,13 +51,15 @@ void init_lcd() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
+    // enable gpio ports C and D
+
     if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOC) {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOC;
     }
 
     if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOD) {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOD;
-    } // enable gpio ports C and D
+    }
 
     // D4 - D7 as outputs
     GPIO_PORTC_DIR_R |= 0xF0;
@@ -68,27 +70,45 @@ void init_lcd() {
     GPIO_PORTD_DEN_R |= 0x4C;
 
     // Toggling 4-bit mode
-    GPIO_PORTD_DATA_R = 0x00; // RS = 0
-    GPIO_PORTC_DATA_R = 0x20; // 4-bit mode
-    GPIO_PORTD_DATA_R = 0x08; // E = 1
+
+    // RS = 0
+    GPIO_PORTD_DATA_R = 0x00;
+
+    // 4-bit mode
+    GPIO_PORTC_DATA_R = 0x20;
+
+    // E = 1
+    GPIO_PORTD_DATA_R = 0x08;
     vTaskDelay(2 / portTICK_RATE_MS);
-    GPIO_PORTD_DATA_R ^= 0x08; // E = 0
+
+    // E = 0
+    GPIO_PORTD_DATA_R ^= 0x08;
 }
 
-void lcd_send(
-    uint8_t data,
-    uint8_t data_type) { // data_type = 0 -> command, data_type = 1 -> 'data'
+void lcd_send(uint8_t data, uint8_t data_type) {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    GPIO_PORTD_DATA_R = (data_type << 2); // Setting mode for data-transfer
-    GPIO_PORTC_DATA_R = data;             // Sending 4 most significant bit
-    GPIO_PORTD_DATA_R |= 0x08;            // E = 1
+    // data_type = 0 -> command, data_type = 1 -> 'data'
+
+    // Setting mode for data-transfer
+    GPIO_PORTD_DATA_R = (data_type << 2);
+
+    // Sending 4 most significant bit
+    GPIO_PORTC_DATA_R = data;
+
+    // E = 1
+    GPIO_PORTD_DATA_R |= 0x08;
+
     vTaskDelay(2 / portTICK_RATE_MS);
-    GPIO_PORTD_DATA_R ^= 0x08;       // E = 0
-    GPIO_PORTC_DATA_R = (data << 4); // Bit-shift 4 times to the left,
-                                     // sending 4 least significant bit
+
+    // E = 0
+    GPIO_PORTD_DATA_R ^= 0x08;
+
+    // Bit-shift 4 times to the left, sending 4 least significant bit
+    GPIO_PORTC_DATA_R = (data << 4);
+
     GPIO_PORTD_DATA_R ^= 0x08;
     vTaskDelay(2 / portTICK_RATE_MS);
     GPIO_PORTD_DATA_R ^= 0x08;
@@ -107,8 +127,10 @@ void lcd_task(void *pvParameters) {
     lcd_send(Entry, Instruction);
 
     char fabse_text[] = "Get linux! >:(";
-    char i; // somehow using "char i = 0" in the for loops result in
-            // an error, need to define it outside
+
+    // somehow using "char i = 0" in the for loops result in an error, need to
+    // define it outside
+    char i;
 
     for (i = 0; i < strlen(fabse_text); i++) {
         lcd_send(fabse_text[i], Output);

@@ -60,7 +60,7 @@ void uart0_putc(uint8_t ch);
  ******************************************************************************/
 
 void uart0_init(uint32_t baud_rate, uint8_t data_size, uint8_t stop_bits,
-		uint8_t parity);
+                uint8_t parity);
 /*****************************************************************************
  *   Input    : -
  *   Output   : -

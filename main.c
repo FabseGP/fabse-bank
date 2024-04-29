@@ -30,11 +30,10 @@
 #include "tm4c123gh6pm.h"
 #include "uart.h"
 
-
 /*****************************    Defines    *******************************/
 
-#define USERTASK_STACK_SIZE                                                    \
-    configMINIMAL_STACK_SIZE // minimum stack size allocated for idle tasks
+// minimum stack size allocated for idle tasks
+#define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
@@ -52,7 +51,8 @@ int main() {
     init_leds();
     init_rotary();
     if (Timer1a_on == 1) {
-        init_timer1a(250); // 1 = 4 ms, 250 = 1 s (setting the prescaler)
+        // 1 = 4 ms, 250 = 1 s (setting the prescaler)
+        init_timer1a(250);
     }
 
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
