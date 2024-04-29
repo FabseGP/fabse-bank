@@ -17,26 +17,26 @@
 
 /***************************** Include files *******************************/
 
-#include "tm4c123gh6pm.h"
-#include "systick_frt.h"
 #include "FreeRTOS.h"
-#include "task.h"
-#include "leds.h"
 #include "adc.h"
-#include "rotary.h"
-#include "lcd.h"
-#include "timer1a.h"
-#include "switches.h"
-#include "uart.h"
 #include "flags.h"
+#include "lcd.h"
+#include "leds.h"
+#include "rotary.h"
+#include "switches.h"
+#include "systick_frt.h"
+#include "task.h"
+#include "timer1a.h"
+#include "tm4c123gh6pm.h"
+#include "uart.h"
+
 
 /*****************************    Defines    *******************************/
 
-#define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE // minimum stack size allocated for idle tasks
+#define USERTASK_STACK_SIZE                                                    \
+    configMINIMAL_STACK_SIZE // minimum stack size allocated for idle tasks
 
-enum Priorities {
-	Idle_prio, Low_prio, Med_prio, High_prio
-};
+enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
 /*****************************   Constants   *******************************/
 
@@ -46,28 +46,27 @@ enum Priorities {
 
 int main() {
 
-	init_systick();
-	init_adc();
-	init_sw1();
-	init_leds();
-	init_rotary();
-	if (Timer1a_on == 1) {
-		init_timer1a(250);        // 1 = 4 ms, 250 = 1 s (setting the prescaler)
-	}
+    init_systick();
+    init_adc();
+    init_sw1();
+    init_leds();
+    init_rotary();
+    if (Timer1a_on == 1) {
+        init_timer1a(250); // 1 = 4 ms, 250 = 1 s (setting the prescaler)
+    }
 
-	xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
-			Low_prio, NULL);
-	xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
-			NULL);
-	xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
-			Low_prio, NULL);
-	xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
-			Low_prio, NULL);
-	xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-	xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-	vTaskStartScheduler();
-	return 0;
-
+    xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
+                Low_prio, NULL);
+    xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
+                NULL);
+    xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
+                Low_prio, NULL);
+    xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
+                Low_prio, NULL);
+    xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    vTaskStartScheduler();
+    return 0;
 }
 
 /****************************** End Of Module *******************************/

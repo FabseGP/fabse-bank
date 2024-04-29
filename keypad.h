@@ -31,7 +31,7 @@
 
 /*****************************   Functions   *******************************/
 
-unsigned char get_keyboard(uint8_t*);
+unsigned char get_keyboard(uint8_t *);
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
