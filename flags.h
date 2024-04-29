@@ -25,10 +25,9 @@
 
 /*****************************    Defines    *******************************/
 
-enum Delay {
-    Timer1a_on = 1 // 0 = use systick for delay
-                   // 1 = use timer1a for delay (can still use systick)
-};
+// 0 = use systick for delay
+// 1 = use timer1a for delay (can still use systick)
+enum Delay { Timer1a_on = 1 };
 
 /*****************************   Constants   *******************************/
 

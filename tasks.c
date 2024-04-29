@@ -42,7 +42,6 @@
 #include "task.h"
 #include "timers.h"
 
-
 /* Lint e9021, e961 and e750 are suppressed as a MISRA exception justified
  * because the MPU ports require MPU_WRAPPERS_INCLUDED_FROM_API_FILE to be
  * defined for the header files above, but not in this file, in order to
@@ -150,7 +149,7 @@
         }                                                                      \
                                                                                \
         /* listGET_OWNER_OF_NEXT_ENTRY indexes through the list, so the tasks  \
-         * of the  same priority get an equal share of the processor time. */               \
+         * of the  same priority get an equal share of the processor time. */  \
         listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB,                              \
                                     &(pxReadyTasksLists[uxTopPriority]));      \
         uxTopReadyPriority = uxTopPriority;                                    \
