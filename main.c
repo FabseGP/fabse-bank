@@ -21,13 +21,12 @@
 #include "systick_frt.h"
 #include "FreeRTOS.h"
 #include "task.h"
-#include "status_led.h"
 #include "leds.h"
 #include "adc.h"
 #include "rotary.h"
 #include "lcd.h"
 #include "timer1a.h"
-#include "portf.h"
+#include "switches.h"
 #include "uart.h"
 #include "flags.h"
 
@@ -36,7 +35,7 @@
 #define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE // minimum stack size allocated for idle tasks
 
 enum Priorities {
-	IDLE_PRIO, LOW_PRIO, MED_PRIO, HIGH_PRIO
+	Idle_prio, Low_prio, Med_prio, High_prio
 };
 
 /*****************************   Constants   *******************************/
@@ -57,15 +56,15 @@ int main() {
 	}
 
 	xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
-			LOW_PRIO, NULL);
-	xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, LOW_PRIO,
+			Low_prio, NULL);
+	xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
 			NULL);
 	xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
-			LOW_PRIO, NULL);
+			Low_prio, NULL);
 	xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
-			LOW_PRIO, NULL);
-	xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
-	xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, LOW_PRIO, NULL);
+			Low_prio, NULL);
+	xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+	xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
 	vTaskStartScheduler();
 	return 0;
 

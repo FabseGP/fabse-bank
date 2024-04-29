@@ -35,23 +35,13 @@ uint8_t direction = 'N';
 
 /*****************************   Functions   *******************************/
 
-void enable_porta() {
-	/*****************************************************************************
-	 *   Function : See module specification (.h-file)
-	 *****************************************************************************/
-
-	// Enable the GPIO port that is used for the digiswitch
-	SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
-
-}
-
 void init_rotary() {
 	/*****************************************************************************
 	 *   Function : See module specification (.h-file)
 	 *****************************************************************************/
 
 	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
-		enable_porta();
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
 	}
 
 	// Enable the GPIO pins for digital function (PA5 - PA7)

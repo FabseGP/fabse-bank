@@ -24,11 +24,42 @@
 
 /*****************************    Defines    *******************************/
 
+enum States {
+	Clear = ~(0x0E), Led_off = 0x0E
+};
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
+
+void init_leds() {
+	/*****************************************************************************
+	 *   Function : See module specification (.h-file)
+	 *****************************************************************************/
+
+	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOF) {
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
+	}
+
+	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOD) {
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOD;
+	}
+
+	// Set the direction as output (PF1 - PF3 & PD6)
+	GPIO_PORTF_DIR_R |= 0x0E;
+	GPIO_PORTD_DIR_R |= 0x40;
+
+	// Enable the GPIO pins for digital function (PF1 - PF3 & PD6)
+	GPIO_PORTF_DEN_R |= 0x0E;
+	GPIO_PORTD_DEN_R |= 0x40;
+
+	// Clear LEDs without manipulating the other bits
+	GPIO_PORTF_DATA_R &= Clear;
+	GPIO_PORTF_DATA_R |= Led_off;
+
+}
 
 void red_led_task(void *pvParameters) {
 	/*****************************************************************************
@@ -67,6 +98,18 @@ void green_led_task(void *pvParameters) {
 		// Toggle green led
 		GPIO_PORTF_DATA_R ^= 0x08;
 		vTaskDelay(1500 / portTICK_RATE_MS); // Wait 1500 ms
+	}
+
+}
+
+void status_led_task(void *pvParameters) {
+	/*****************************************************************************
+	 *   Function : See module specification (.h-file)
+	 *****************************************************************************/
+
+	while (1) {
+		GPIO_PORTD_DATA_R ^= 0x40; // Toggle status LED
+		vTaskDelay(500 / portTICK_RATE_MS); // Wait 500 ms
 	}
 
 }

@@ -3,11 +3,11 @@
  * Embedded Programming (EMP)
  * Fabian Petrus
  *
- * MODULENAME.: sw1_interrupt.h
+ * MODULENAME.: portf.h
  *
  * PROJECT....: Assignment8
  *
- * DESCRIPTION: Interrupt handling for SW1, including debouncer
+ * DESCRIPTION: Initializing portf
  *
  * Change Log.:
  ******************************************************************************
@@ -18,8 +18,8 @@
  *
  *****************************************************************************/
 
-#ifndef _SW1_INTERRUPT_H_
-#define _SW1_INTERRUPT_H_
+#ifndef _PORTF_H_
+#define _PORTF_H_
 
 /***************************** Include files *******************************/
 
@@ -30,6 +30,13 @@
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
+
+void init_sw1();
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Initialize sw1 as output with pullup-resistor
+ ******************************************************************************/
 
 void init_sw1_interrupt();
 /*****************************************************************************

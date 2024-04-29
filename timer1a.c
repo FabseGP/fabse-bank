@@ -22,6 +22,11 @@
 
 /*****************************    Defines    *******************************/
 
+enum Sw1_debouncer {
+	Clear_interrupt = 0x10
+
+};
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
@@ -41,7 +46,7 @@ void init_timer1a(uint8_t prescaler) {
 								// periodic chosen to enter interrupt periodically after set time
 	TIMER1_TAILR_R = 64000 - 1;   // count to 64000, just about 4 ms alone
 	TIMER1_TAPR_R = prescaler - 1; // sets prescaler to 250, since 250*4 ms = 1 s; -1 here because 250 is 251 bits
-	TIMER1_ICR_R = 0x01;         // clear interrupt flag
+	TIMER1_ICR_R = Clear_interrupt;         // clear interrupt flag
 	TIMER1_IMR_R |= 0x01;       // setting bit 0 enables interrupt mask
 								// apparently "mask" is said about any bit that toggles functionality
 	TIMER1_CTL_R |= 0x01;       // enable timer1a output
@@ -55,7 +60,7 @@ void timer1a_interrupt_handler() {
 	 *   Function : See module specification (.h-file)
 	 *****************************************************************************/
 
-	TIMER1_ICR_R = 0x01;
+	TIMER1_ICR_R = Clear_interrupt;
 
 }
 

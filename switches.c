@@ -3,7 +3,7 @@
  * Embedded Programming (EMP)
  * Fabian Petrus
  *
- * MODULENAME.: sw1_interrupt.c
+ * MODULENAME.: portf.c
  * PROJECT....: Assignment8
  * DESCRIPTION: See module specification file (.h-file)
  * Change log.:
@@ -18,8 +18,8 @@
 /***************************** Include files *******************************/
 
 #include <stdint.h>
-#include "tm4c123gh6pm.h"
 #include "rotary.h"
+#include "tm4c123gh6pm.h"
 
 /*****************************    Defines    *******************************/
 
@@ -34,6 +34,25 @@ enum Sw1_debouncer {
 
 /*****************************   Functions   *******************************/
 
+void init_sw1() {
+	/*****************************************************************************
+	 *   Function : See module specification (.h-file)
+	 *****************************************************************************/
+
+	if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOF) {
+		SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
+	}
+
+	// Enable the GPIO pins for digital function (PF4)
+	GPIO_PORTF_DEN_R |= 0x10;
+
+	// Enable internal pull-up (PF4).
+	GPIO_PORTF_PUR_R |= 0x11;
+
+	init_sw1_interrupt();
+
+}
+
 void init_sw1_interrupt() {
 	/*****************************************************************************
 	 *   Function : See module specification (.h-file)
@@ -46,7 +65,7 @@ void init_sw1_interrupt() {
 	GPIO_PORTF_IEV_R &= ~(0x10);    // if cleared = interrupt on falling edge
 	GPIO_PORTF_IM_R |= 0x10;      // allows interrupts to (quote from datasheet)
 								  // "be sent to the interrupt controller on the combined interrupt signal"
-	GPIO_PORTF_ICR_R |= 0x10;       // clears any previous interrupts on pin PF4
+	GPIO_PORTF_ICR_R |= Clear_interrupt;       // clears any previous interrupts on pin PF4
 
 	// Check table 2-9 on the datasheet for the interrupt table, there you can see that the interrupt number for PORTF is 30
 	NVIC_PRI7_R |= (3 << 21); // PDF-page 151 in datasheet; setting interrupt priority to 3
