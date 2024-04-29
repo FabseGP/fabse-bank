@@ -32,8 +32,8 @@
 
 /*****************************    Defines    *******************************/
 
-// minimum stack size allocated for idle tasks
-#define USERTASK_STACK_SIZE configMINIMAL_STACK_SIZE
+// Minimum stack size allocated for idle tasks
+enum Stack_size { USERTASK_STACK_SIZE = configMINIMAL_STACK_SIZE };
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
