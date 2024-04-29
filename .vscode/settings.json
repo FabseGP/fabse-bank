@@ -5,6 +5,10 @@
         "stdint.h": "c",
         "cstdlib": "c",
         "export": "c",
-        "cstdint": "cpp"
-    }
+        "cstdint": "cpp",
+        "compare": "c",
+        "emp_type.h": "c"
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "xaver.clang-format"
 }
