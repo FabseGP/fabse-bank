@@ -4,7 +4,7 @@
  * Fabian Petrus
  *
  * MODULENAME.: rotary.c
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  * DESCRIPTION: See module specification file (.h-file)
  * Change log.:
  ******************************************************************************
@@ -88,9 +88,6 @@ void rotary_interrupt_handler() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    GPIO_PORTA_ICR_R |=
-        Clear_interrupt; // Clears any previous interrupts on PA5
-
     if ((GPIO_PORTA_DATA_R & 0x20) &&
         (GPIO_PORTA_DATA_R &
          0x40)) { // checks if PA5 and PA6 have the same state
@@ -98,6 +95,9 @@ void rotary_interrupt_handler() {
     } else {
         direction = 'R';
     }
+
+    GPIO_PORTA_ICR_R |=
+        Clear_interrupt; // Clears any previous interrupts on PA5
 }
 
 /****************************** End Of Module *******************************/

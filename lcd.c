@@ -4,7 +4,7 @@
  * Fabian Petrus
  *
  * MODULENAME.: lcd.c
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  * DESCRIPTION: See module specification file (.h-file)
  * Change log.:
  ******************************************************************************
@@ -18,7 +18,10 @@
 /***************************** Include files *******************************/
 
 #include "FreeRTOS.h"
+#include "queue.h"
 #include "rotary.h"
+#include "semphr.h"
+#include "switches.h"
 #include "task.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
@@ -139,8 +142,13 @@ void lcd_task(void *pvParameters) {
     lcd_send(Bottom_line, Instruction);
 
     while (1) {
-        lcd_send(direction, Output);
+        uint8_t state;
+        if (xQueueReceive(xDirectionQueue, &state, portMAX_DELAY) == pdPASS) {
+            xSemaphoreTake(xDirectionSemaphore, portMAX_DELAY);
+            lcd_send(state, Output);
+            xSemaphoreGive(xDirectionSemaphore);
+        }
     }
 }
 
-/****************************** End Of Module *******************************/
+/****************************** End Of Module * *******************************/

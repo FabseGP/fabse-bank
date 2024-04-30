@@ -5,7 +5,7 @@
  *
  * MODULENAME.: uart.h
  *
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  *
  * DESCRIPTION: Initializing UART
  *

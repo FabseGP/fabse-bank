@@ -5,7 +5,7 @@
  *
  * MODULENAME.: portf.h
  *
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  *
  * DESCRIPTION: Initializing portf
  *
@@ -23,7 +23,14 @@
 
 /***************************** Include files *******************************/
 
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
+
 /*****************************    Defines    *******************************/
+
+extern QueueHandle_t     xDirectionQueue;
+extern SemaphoreHandle_t xDirectionSemaphore;
 
 /*****************************   Constants   *******************************/
 

@@ -4,7 +4,7 @@
  *
  * MODULENAME.: emp_type.h
  *
- * PROJECT....: EMP
+ * PROJECT....: fabse_bankw
  *
  * DESCRIPTION: Definements of variable types.
  *

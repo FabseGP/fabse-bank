@@ -5,7 +5,7 @@
  *
  * MODULENAME.: lcd.h
  *
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  *
  * DESCRIPTION: Initializing LCD-display and sending commands/data
  *

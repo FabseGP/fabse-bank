@@ -3,23 +3,23 @@
  * Embedded Programming (EMP)
  * Fabian Petrus
  *
- * MODULENAME.: timer1a.h
+ * MODULENAME.: glob_def.h
  *
  * PROJECT....: fabse_bank
  *
- * DESCRIPTION: Initializing timer1a with timed interrupt
+ * DESCRIPTION: Global variables/defines
  *
  * Change Log.:
  ******************************************************************************
  * Date    Id    Change
  * DDMMYY
  * --------------------
- * 260424  MoH    Module created
+ * 300424  MoH    Module created
  *
  *****************************************************************************/
 
-#ifndef _TIMER1A_H_
-#define _TIMER1A_H_
+#ifndef _GLOB_DEF_H_
+#define _GLOB_DEF_H_
 
 /***************************** Include files *******************************/
 
@@ -30,20 +30,6 @@
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
-
-void init_timer1a(uint8_t prescaler);
-/*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Initialize timer1a
- ******************************************************************************/
-
-void timer1a_interrupt_handler();
-/*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Handler when timer1a have counted to set value
- ******************************************************************************/
 
 /****************************** End Of Module *******************************/
 

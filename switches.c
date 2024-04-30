@@ -4,27 +4,32 @@
  * Fabian Petrus
  *
  * MODULENAME.: portf.c
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  * DESCRIPTION: See module specification file (.h-file)
  * Change log.:
  ******************************************************************************
  * Date    Id    Change
  * DDMMYY
- * --------------------
- * 260424  MoH    Module created
- *
+ * --------------------direction
  *****************************************************************************/
 
 /***************************** Include files *******************************/
 
 #include "switches.h"
+#include "FreeRTOS.h"
+#include "global_def.h"
+#include "queue.h"
 #include "rotary.h"
+#include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer { Debounce_time = 50, Clear_interrupt = 0x10, Clear = 0 };
+
+QueueHandle_t     xDirectionQueue;
+SemaphoreHandle_t xDirectionSemaphore;
 
 /*****************************   Constants   *******************************/
 
@@ -104,7 +109,10 @@ void sw1_debouncer() {
             debounce_counter = Clear;
         }
         if (debounce_counter == Debounce_time) {
+            xSemaphoreTake(xDirectionSemaphore, portMAX_DELAY);
             direction = 'P';
+            xQueueSend(xDirectionQueue, &direction, portMAX_DELAY);
+            xSemaphoreGive(xDirectionSemaphore);
         }
         old_press = GPIO_PORTF_DATA_R;
     }
