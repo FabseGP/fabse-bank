@@ -5,7 +5,7 @@
  *
  * MODULENAME.: flags.h
  *
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  *
  * DESCRIPTION: Toggle functionalities in code with flags
  *

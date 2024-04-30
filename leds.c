@@ -4,7 +4,7 @@
  * Fabian Petrus
  *
  * MODULENAME.: leds.c
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  * DESCRIPTION: See module specification file (.h-file)
  * Change log.:
  ******************************************************************************

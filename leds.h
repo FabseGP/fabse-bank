@@ -5,7 +5,7 @@
  *
  * MODULENAME.: leds.h
  *
- * PROJECT....: Assignment8
+ * PROJECT....: fabse_bank
  *
  * DESCRIPTION: Analog input from EMP-board pot-meter
  *

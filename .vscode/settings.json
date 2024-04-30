@@ -7,7 +7,9 @@
         "export": "c",
         "cstdint": "cpp",
         "compare": "c",
-        "emp_type.h": "c"
+        "emp_type.h": "c",
+        "rotary.h": "c",
+        "leds.h": "c"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format"
