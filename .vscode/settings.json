@@ -9,7 +9,9 @@
         "compare": "c",
         "emp_type.h": "c",
         "rotary.h": "c",
-        "leds.h": "c"
+        "leds.h": "c",
+        "global_def.h": "c",
+        "locale": "c"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format"

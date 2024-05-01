@@ -18,7 +18,11 @@
 /***************************** Include files *******************************/
 
 #include "rotary.h"
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
 #include "tm4c123gh6pm.h"
+#include "uart.h"
 #include <stdint.h>
 
 /*****************************    Defines    *******************************/
@@ -28,8 +32,6 @@ enum States { Clear_interrupt = 0x20 };
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
-uint8_t direction = 'N';
 
 /*****************************   Functions   *******************************/
 
@@ -88,12 +90,19 @@ void rotary_interrupt_handler() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    if ((GPIO_PORTA_DATA_R & 0x20) &&
-        (GPIO_PORTA_DATA_R &
-         0x40)) { // checks if PA5 and PA6 have the same state
-        direction = 'L';
+    uint8_t direction = 'N';
+
+    // checks if PA5 and PA6 have the same state
+    if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
+        xSemaphoreTake(xUARTSemaphore, portMAX_DELAY);
+        direction = 'P';
+        xQueueSend(xUARTQueue, &direction, portMAX_DELAY);
+        xSemaphoreGive(xUARTSemaphore);
     } else {
+        xSemaphoreTake(xUARTSemaphore, portMAX_DELAY);
         direction = 'R';
+        xQueueSend(xUARTQueue, &direction, portMAX_DELAY);
+        xSemaphoreGive(xUARTSemaphore);
     }
 
     GPIO_PORTA_ICR_R |=
