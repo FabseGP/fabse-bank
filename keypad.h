@@ -31,18 +31,18 @@
 
 /*****************************   Functions   *******************************/
 
-unsigned char get_keyboard(uint8_t *);
+void init_keypad();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Character ready at uart0 RX
+ *   Function : init keypad
  ******************************************************************************/
 
-void key_task(uint8_t, uint8_t, uint8_t, uint8_t);
+void keypad_task(void* pvParameters);
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Character ready at uart0 RX
+ *   Function : Finds the button press in a 3x4 matrix
  ******************************************************************************/
 
 /****************************** End Of Module *******************************/
