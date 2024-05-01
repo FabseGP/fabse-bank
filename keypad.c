@@ -22,104 +22,113 @@
 
 /*****************************    Defines    *******************************/
 
+#define rows 4
+#define cols 3
+#define colX1 0x04
+#define colX2 0x08
+#define colX3 0x10
+
+#define rowY1 0x01;
+#define rowY2 0x02;
+#define rowY3 0x04;
+#define rowY4 0x08;
+
 /*****************************   Constants   *******************************/
+
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-uint8_t row(uint8_t y) {
 
-    uint8_t result = 0;
 
-    switch (y) {
-        case 0x01:
-            result = 1;
-            break;
-        case 0x02:
-            result = 2;
-            break;
-        case 0x04:
-            result = 3;
-            break;
-        case 0x08:
-            result = 4;
-            break;
-    }
 
-    return result;
+void init_keypad(){
+    if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
+            SYSCTL_RCGC2_R = SYSCTL_RCGC2_R | SYSCTL_RCGC2_GPIOA | SYSCTL_RCGC2_GPIOE;
+        }
+
+    // Enable GPIO pins,
+    GPIO_PORTA_DEN_R |= 0x1C;
+    GPIO_PORTE_DEN_R |= 0x0E;
+
+
+    // The rows get pull up pins, we will use these as inputs.
+    // The rows are the ones with the most
+    //GPIO_PORTE_PUR_R |= 0X1C;
+    GPIO_PORTE_PDR_R |= 0x0E;
+
+    // PORT A as outputs
+    GPIO_PORTA_DIR_R |= 0X1C;
 }
 
-uint8_t key_catch(x, y)
-uint8_t x, y;
-{
-    const uint8_t matrix[3][4] = {
-        {'*', '7', '4', '1'}, {'0', '8', '5', '2'}, {'#', '9', '6', '3'}};
 
-    return (matrix[x - 1][y - 1]);
-}
+void keypad_task(void* pvParameters)
 
-unsigned char get_keyboard(uint8_t *pch) {
-    // return (get_queue(Q_KEY, pch, WAIT_FOREVER));
-    return 2;
-}
+    //uint8_t rowData =
+   // int matrix[3][4] = {0};
+while(1){
 
-unsigned char check_column(uint8_t x) {
-    uint8_t y =
-        GPIO_PORTE_DATA_R & 0x0F; // Save the values of the 4 bits for the rows
-    if (y) {                      // If one of them are set...
-        // ...we first find the row number with the function row()
-        uint8_t ch = key_catch(
-            x, row(y)); // Now that we have the row and column we look up the
-                        // corresponding character using the function key_catch
-        // put_queue(Q_KEY, ch, 1); // Put the character in a queue so it can be
-        // used by another task
-        return 1;
-    }
-    return 0;
-}
+    uint8_t colCheckVal = 0x04;
+    int i = 0;
+    for(i = 0; i < cols; i++){
 
-extern void key_task(uint8_t my_id, uint8_t my_state, uint8_t event,
-                     uint8_t data) {
-    /*****************************************************************************
-     *   Input    :
-     *   Output   :
-     *   Function :
-     ******************************************************************************/
+        uint8_t rowCheckVal = 0x01;
+        int j = 0;
+        GPIO_PORTA_DATA_R &= 0x00;
+        GPIO_PORTA_DATA_R |= colCheckVal;
 
-    switch (my_state) {
-        case 0:
-            GPIO_PORTA_DATA_R &= 0xE3; // Clear the 3 bits for the columns
-            GPIO_PORTA_DATA_R |= 0x10; // Set the bit for column 1
-            if (check_column(1)) { // Check all the rows for column 1, using the
-                                   // function check_column
-                // If a button press is registered we go to next state so the
-                // press is only registered once
-                set_state(1);
+
+        switch(colCheckVal){
+            case colX1: {
+                for(j = 0; j < rows; j++){
+                    if(GPIO_PORTE_DATA_R & (rowCheckVal)){
+                        //matrix[i][j] = 1; // Maybe put in queue here
+
+                        // Toggle red led
+                               GPIO_PORTF_DATA_R ^= 0x02;
+                               //while(1){}
+                    }
+                    rowCheckVal <<= 1;
+                }
                 break;
             }
-            GPIO_PORTA_DATA_R &=
-                0xE3; // Repeat the above for the two other columns
-            GPIO_PORTA_DATA_R |= 0x08;
-            if (check_column(2)) {
-                set_state(1);
+            case colX2: {
+                for(j = 0; j < rows; j++){
+                    if(GPIO_PORTE_DATA_R & (rowCheckVal)){
+                        //matrix[i][j] = 1; // Maybe put in queue here
+                        // Toggle red led
+                               GPIO_PORTF_DATA_R ^= 0x04;
+                               //while(1){}
+
+                    }
+                    rowCheckVal <<= 1;
+                }
                 break;
             }
-            GPIO_PORTA_DATA_R &= 0xE3;
-            GPIO_PORTA_DATA_R |= 0x04;
-            if (check_column(3)) {
-                set_state(1);
+            case colX3: {
+                for(j = 0; j < rows; j++){
+                    if(GPIO_PORTE_DATA_R & (rowCheckVal)){
+                        //matrix[i][j] = 1; // Maybe put in queue here
+                        // Toggle red led
+                               GPIO_PORTF_DATA_R ^= 0x08;
+                               //while(1){}
+
+                    }
+                    rowCheckVal <<= 1;
+                }
                 break;
             }
-            break;
-        case 1:
-            if (!(GPIO_PORTE_DATA_R &
-                  0x0F)) { // We stay here until the button is released so a
-                           // button press is not counted more than once
-                set_state(0);
-            }
-            break;
+            default: break;
+
+
+        }
+        colCheckVal <<= 1;
+        // TODO: Make this in a for-loop
+
     }
 }
+}
+
 
 /****************************** End Of Module *******************************/
