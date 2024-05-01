@@ -17,11 +17,17 @@
 
 /***************************** Include files *******************************/
 
+#include "FreeRTOS.h"
+#include "queue.h"
 #include "rotary.h"
+#include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
 /*****************************    Defines    *******************************/
+
+QueueHandle_t     xUARTQueue;
+SemaphoreHandle_t xUARTSemaphore;
 
 /*****************************   Constants   *******************************/
 
@@ -190,7 +196,12 @@ void uart0_task(void *pvParameters) {
     uart0_init(9600, 8, 1, 'n');
 
     while (1) {
-        uart0_putc(direction);
+        uint8_t data;
+        if (xQueueReceive(xUARTQueue, &data, portMAX_DELAY) == pdPASS) {
+            xSemaphoreTake(xUARTSemaphore, portMAX_DELAY);
+            uart0_putc(data);
+            xSemaphoreGive(xUARTSemaphore);
+        }
         uart0_putc('\n');
     }
 }

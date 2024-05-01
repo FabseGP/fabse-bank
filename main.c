@@ -59,8 +59,11 @@ int main() {
     }
 
     // Queue with 10 elements of uint8_t-type + semaphore
-    xDirectionQueue     = xQueueCreate(10, sizeof(uint8_t));
-    xDirectionSemaphore = xSemaphoreCreateBinary();
+    xLCDQueue      = xQueueCreate(10, sizeof(uint8_t));
+    xLCDSemaphore  = xSemaphoreCreateBinary();
+
+    xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xUARTSemaphore = xSemaphoreCreateBinary();
 
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
@@ -71,9 +74,11 @@ int main() {
     xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    // xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // NULL);
 
-    xSemaphoreGive(xDirectionSemaphore);
+    xSemaphoreGive(xLCDSemaphore);
+    xSemaphoreGive(xUARTSemaphore);
 
     vTaskStartScheduler();
 

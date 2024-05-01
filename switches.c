@@ -18,6 +18,7 @@
 #include "switches.h"
 #include "FreeRTOS.h"
 #include "global_def.h"
+#include "lcd.h"
 #include "queue.h"
 #include "rotary.h"
 #include "semphr.h"
@@ -27,9 +28,6 @@
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer { Debounce_time = 50, Clear_interrupt = 0x10, Clear = 0 };
-
-QueueHandle_t     xDirectionQueue;
-SemaphoreHandle_t xDirectionSemaphore;
 
 /*****************************   Constants   *******************************/
 
@@ -50,7 +48,7 @@ void init_sw1() {
     GPIO_PORTF_DEN_R |= 0x10;
 
     // Enable internal pull-up (PF4).
-    GPIO_PORTF_PUR_R |= 0x11;
+    GPIO_PORTF_PUR_R |= 0x10;
 
     init_sw1_interrupt();
 }
@@ -95,7 +93,7 @@ void sw1_debouncer() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t debounce_counter = 0, old_press = 0;
+    uint8_t debounce_counter = 0, old_press = 0, state;
 
     // Clears any previous interrupts on pin PF4
     GPIO_PORTF_ICR_R |= Clear_interrupt;
@@ -109,10 +107,10 @@ void sw1_debouncer() {
             debounce_counter = Clear;
         }
         if (debounce_counter == Debounce_time) {
-            xSemaphoreTake(xDirectionSemaphore, portMAX_DELAY);
-            direction = 'P';
-            xQueueSend(xDirectionQueue, &direction, portMAX_DELAY);
-            xSemaphoreGive(xDirectionSemaphore);
+            xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+            state = 'P';
+            xQueueSend(xLCDQueue, &state, portMAX_DELAY);
+            xSemaphoreGive(xLCDSemaphore);
         }
         old_press = GPIO_PORTF_DATA_R;
     }

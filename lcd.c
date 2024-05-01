@@ -43,6 +43,9 @@ enum Commands {
     Cursor_left  = 0x10   // shifts cursor to the left
 };
 
+QueueHandle_t     xLCDQueue;
+SemaphoreHandle_t xLCDSemaphore;
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
@@ -142,11 +145,11 @@ void lcd_task(void *pvParameters) {
     lcd_send(Bottom_line, Instruction);
 
     while (1) {
-        uint8_t state;
-        if (xQueueReceive(xDirectionQueue, &state, portMAX_DELAY) == pdPASS) {
-            xSemaphoreTake(xDirectionSemaphore, portMAX_DELAY);
-            lcd_send(state, Output);
-            xSemaphoreGive(xDirectionSemaphore);
+        uint8_t data;
+        if (xQueueReceive(xLCDQueue, &data, portMAX_DELAY) == pdPASS) {
+            xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+            lcd_send(data, Output);
+            xSemaphoreGive(xLCDSemaphore);
         }
     }
 }
