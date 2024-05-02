@@ -33,7 +33,7 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 
-void        sw1_interrupt_handler();
+void        switch_interrupt_handler();
 void        rotary_interrupt_handler();
 void        timer1a_interrupt_handler();
 
@@ -118,7 +118,7 @@ void (*const g_pfnVectors[])(void) = {
     IntDefaultHandler,         // Analog Comparator 2
     IntDefaultHandler,         // System Control (PLL, OSC, BO)
     IntDefaultHandler,         // FLASH Control
-    sw1_interrupt_handler,     // GPIO Port F
+    switch_interrupt_handler,  // GPIO Port F
     IntDefaultHandler,         // GPIO Port G
     IntDefaultHandler,         // GPIO Port H
     IntDefaultHandler,         // UART2 Rx and Tx

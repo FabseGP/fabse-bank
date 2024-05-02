@@ -36,6 +36,7 @@ extern QueueHandle_t     xUARTQueue;
 extern SemaphoreHandle_t xUARTSemaphore;
 
 extern SemaphoreHandle_t xBankStateSemaphore;
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
@@ -52,6 +53,7 @@ enum BankState {
 };
 
 extern int BankState; //
+
 /*****************************   Functions   *******************************/
 
 /****************************** End Of Module *******************************/
