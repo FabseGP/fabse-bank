@@ -178,7 +178,7 @@ void uart0_init(uint32_t baud_rate, uint8_t data_size, uint8_t stop_bits,
     UART0_LCRH_R &= 0xFFFFFFEF;
 
     // Enable fifos
-    UART0_LCRH_R |= 0x00000010;
+    // UART0_LCRH_R |= 0x00000010;
 
     // Enable UART
     UART0_CTL_R |= (UART_CTL_UARTEN | UART_CTL_TXE);
@@ -199,9 +199,8 @@ void uart0_task(void *pvParameters) {
            { xSemaphoreTake(xUARTSemaphore, (TickType_t)10); uart0_putc(data);
                     xSemaphoreGive(xUARTSemaphore);
                 }
-        */
+                */
     }
 }
 
-/****************************** End Of Module
- * *******************************/
+/****************************** End Of Module * *******************************/
