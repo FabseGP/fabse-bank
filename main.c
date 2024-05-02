@@ -57,14 +57,14 @@ int main() {
         // 1 = 4 ms, 250 = 1 s (setting the prescaler)
         init_timer1a(250);
     }
-    /*
-        // Queue with 10 elements of uint8_t-type + semaphore
-        xLCDQueue      = xQueueCreate(10, sizeof(uint8_t));
-        xLCDSemaphore  = xSemaphoreCreateBinary();
 
-        xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
-        xUARTSemaphore = xSemaphoreCreateBinary();
-    */
+    // Queue with 10 elements of uint8_t-type + semaphore
+    xLCDQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xLCDSemaphore = xSemaphoreCreateBinary();
+    /*
+            xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
+            xUARTSemaphore = xSemaphoreCreateBinary();
+     */
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
     xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
@@ -76,7 +76,7 @@ int main() {
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
 
-    //   xSemaphoreGive(xLCDSemaphore);
+    xSemaphoreGive(xLCDSemaphore);
     //   xSemaphoreGive(xUARTSemaphore);
 
     vTaskStartScheduler();
