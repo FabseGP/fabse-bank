@@ -41,23 +41,16 @@ enum Commands {
     CLEAR 0x00
 }
 
-<<<<<<< HEAD
-=======
 /*****************************   Constants   *******************************/
 char **keypadArr;
 
 // QueueHandle_t     xLCDQueue;
 // SemaphoreHandle_t xLCDSemaphore;
->>>>>>> ff6033a (Updated with FreeRTOS)
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-<<<<<<< HEAD
-void init_keypad() {
-=======
 void init_keypad_and_arr() {
->>>>>>> ff6033a (Updated with FreeRTOS)
     if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
         SYSCTL_RCGC2_R =
             SYSCTL_RCGC2_R | SYSCTL_RCGC2_GPIOA | SYSCTL_RCGC2_GPIOE;
@@ -81,34 +74,6 @@ void init_keypad_and_arr() {
     fillKeypadArr(keypadArr);
 }
 
-<<<<<<< HEAD
-void keypad_task(void *pvParameters) {
-
-    // uint8_t rowData =
-    // int matrix[3][4] = {0};
-    while (1) {
-
-        uint8_t colCheckVal = 0x04;
-        int     i           = 0;
-        for (i = 0; i < cols; i++) {
-
-            uint8_t rowCheckVal = 0x01;
-            int     j           = 0;
-            GPIO_PORTA_DATA_R &= 0x00;
-            GPIO_PORTA_DATA_R |= colCheckVal;
-
-            switch (colCheckVal) {
-                case colX1: {
-                    for (j = 0; j < rows; j++) {
-                        if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                            // matrix[i][j] = 1; // Maybe put in queue here
-
-                            // Toggle red led
-                            GPIO_PORTF_DATA_R ^= 0x02;
-                            // while(1){}
-                        }
-                        rowCheckVal <<= 1;
-=======
 char **createArray(int m, int n) { // m = rows, n = columns
 
     // Values is the initial "box" of pointers. It has the size of
@@ -184,21 +149,9 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
->>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
-<<<<<<< HEAD
-                case colX2: {
-                    for (j = 0; j < rows; j++) {
-                        if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                            // matrix[i][j] = 1; // Maybe put in queue here
-                            //  Toggle red led
-                            GPIO_PORTF_DATA_R ^= 0x04;
-                            // while(1){}
-                        }
-                        rowCheckVal <<= 1;
-=======
                 break;
             }
             case colX2: {
@@ -208,21 +161,9 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
->>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
-<<<<<<< HEAD
-                case colX3: {
-                    for (j = 0; j < rows; j++) {
-                        if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                            // matrix[i][j] = 1; // Maybe put in queue here
-                            //  Toggle red led
-                            GPIO_PORTF_DATA_R ^= 0x08;
-                            // while(1){}
-                        }
-                        rowCheckVal <<= 1;
-=======
                 break;
             }
             case colX3: {
@@ -232,20 +173,12 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
->>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
                 default:
                     break;
             }
-<<<<<<< HEAD
-            colCheckVal <<= 1;
-            // TODO: Make this in a for-loop
-        }
-    }
-}
-=======
             default:
                 break;
         }
@@ -263,6 +196,5 @@ void keypad_task(void *pvParameters) {
     }
     destroyArray();
 }
->>>>>>> ff6033a (Updated with FreeRTOS)
 
 /****************************** End Of Module *******************************/
