@@ -75,6 +75,8 @@ int main() {
                 Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    xTaskCreate(keypad_task,"Keypad", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+
 
     xSemaphoreGive(xLCDSemaphore);
     //xSemaphoreGive(xUARTSemaphore);

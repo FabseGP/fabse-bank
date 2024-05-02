@@ -38,7 +38,8 @@ extern SemaphoreHandle_t xUARTSemaphore;
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
-
+extern int money;
+extern bool readyCheck; // Password control, withdraw control, money check
 /*****************************   Functions   *******************************/
 
 /****************************** End Of Module *******************************/
