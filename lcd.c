@@ -167,8 +167,8 @@ for (i = 0; i < strlen(fabse_text3); i++) {
       }
     while (1) {
         uint8_t data;
-        if (xQueueReceive(xLCDQueue, &data, portMAX_DELAY) == pdPASS) {
-            xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+        if (xQueueReceive(xLCDQueue, &data, (TickType_t)10) == pdPASS) {
+            xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
             lcd_send(data, Output);
             xSemaphoreGive(xLCDSemaphore);
         }
