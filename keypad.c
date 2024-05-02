@@ -46,6 +46,11 @@ char **keypadArr;
 // QueueHandle_t     xLCDQueue;
 // SemaphoreHandle_t xLCDSemaphore;
 /*****************************   Variables   *******************************/
+char              passwordArr[4]  = {0, 0, 0, 0};
+int               passwordCounter = 0;
+char              moneyArr[4]     = {0, 0, 0, 0};
+int               moneyCounter    = 0;
+SemaphoreHandle_t xBankStateSemaphore;
 
 /*****************************   Functions   *******************************/
 
@@ -58,7 +63,7 @@ char **createArray(int m, int n) { // m = rows, n = columns
 
     // Error check. If values is a null pointer the function returns NULL
     if (values == NULL) {
-        //printf("Memory allocation failed for values!\n");
+        // printf("Memory allocation failed for values!\n");
         return NULL;
     }
 
@@ -66,7 +71,7 @@ char **createArray(int m, int n) { // m = rows, n = columns
     char **rowsInit = (char **)(malloc(m * sizeof(char *)));
     // Error check. If rows is a null pointer the function returns NULL
     if (rowsInit == NULL) {
-        //printf("Memory allocation failed for rows!\n");
+        // printf("Memory allocation failed for rows!\n");
         free(values); // Free previously allocated memory
         return NULL;
     }
@@ -85,7 +90,6 @@ void destroyArray(char **arr) {
     free(arr);
 }
 
-
 void fillKeypadArr(char **arr) {
     arr[0][0] = '1';
     arr[0][1] = '2';
@@ -100,7 +104,6 @@ void fillKeypadArr(char **arr) {
     arr[3][1] = '0';
     arr[3][2] = '#';
 }
-
 
 void init_keypad_and_arr() {
     if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
@@ -126,7 +129,94 @@ void init_keypad_and_arr() {
     fillKeypadArr(keypadArr);
 }
 
+int moneyCheck(char moneyArr[]) {
+    int  i;
+    int  sum       = 0;
+    int  eksponent = 1;
+    char moneyChar;
+    int  moneyInt;
+    for (i = 0; i < 4; i++) {
+        moneyChar = moneyArr[i];
+        if (moneyChar == '*' || moneyChar == '#') {
+            return 0;
+        }
+        moneyInt = moneyChar - '0'; // Find int value of the char
+        moneyInt = moneyInt * eksponent;
+        sum += moneyInt;
+        eksponent = eksponent * 10;
+    }
+    if (sum % 8 == 0) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+int passwordCheck(char passwordArr[]) {
+    int  i;
+    int  sum       = 0;
+    int  eksponent = 1;
+    char passwordChar;
+    int  passwordInt;
+    for (i = 0; i < 4; i++) {
+        passwordChar = passwordArr[i];
+        if (passwordChar == '*' || passwordChar == '#') {
+            return 0;
+        }
+        passwordInt = passwordChar - '0'; // Find int value of the char
+        passwordInt = passwordInt * eksponent;
+        sum += passwordInt;
+        eksponent = eksponent * 10;
+    }
+    if (sum <= 9999) {
+        return sum;
+    } else {
+        return -1;
+    }
+}
+
+void keypad_state(char keypadPressVal) {
+
+    switch (BankState) {
+        case Welcome: {
+            break;
+        }
+        case Money: {
+            if (moneyCounter < 4) {
+                moneyArr[moneyCounter] = keypadPressVal;
+                moneyCounter++;
+            } else {
+                xSemaphoreTake(xBankStateSemaphore, portMAX_DELAY);
+                if (moneyCheck(moneyArr) != 0) {
+                    BankState = Password;
+                }
+                moneyCounter = 0;
+                // Here we can add a int money Queue to put the sum of the money
+                // if it is important
+                xSemaphoreGive(xBankStateSemaphore);
+            }
+        }
+        case Password: {
+            if (passwordCounter < 4) {
+                passwordArr[passwordCounter] = keypadPressVal;
+                passwordCounter++;
+            } else {
+                xSemaphoreTake(xBankStateSemaphore, portMAX_DELAY);
+                if (passwordCheck(passwordArr)) {
+                    BankState = Withdraw;
+                }
+                passwordCounter = 0;
+                xSemaphoreGive(xBankStateSemaphore);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void keypad_press() {
+
     uint8_t colCheckVal =
         0x04; // This value corresponds with the first GPIO port and will be
               // bitshifted to correspond with the next
@@ -148,6 +238,7 @@ void keypad_press() {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
                         xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
                         keypadPressVal = keypadArr[j][i];
+                        keypad_state(keypadPressVal);
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
                         break;
@@ -160,6 +251,7 @@ void keypad_press() {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
                         xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
                         keypadPressVal = keypadArr[j][i];
+                        keypad_state(keypadPressVal);
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
                         break;
@@ -172,6 +264,7 @@ void keypad_press() {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
                         xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
                         keypadPressVal = keypadArr[j][i];
+                        keypad_state(keypadPressVal);
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
                         break;
@@ -185,12 +278,9 @@ void keypad_press() {
         colCheckVal <<= 1;
     }
 }
-
 void keypad_task(void *pvParameters) {
 
     init_keypad_and_arr();
-    // uint8_t rowData =
-    // int matrix[3][4] = {0};
     while (1) {
         keypad_press();
     }
