@@ -35,11 +35,23 @@ extern SemaphoreHandle_t xLCDSemaphore;
 extern QueueHandle_t     xUARTQueue;
 extern SemaphoreHandle_t xUARTSemaphore;
 
+extern SemaphoreHandle_t xBankStateSemaphore;
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
 extern int money;
-extern bool readyCheck; // Password control, withdraw control, money check
+extern int readyCheck; // Password control, withdraw control, money check
+
+enum BankState {
+    Welcome,
+    Money,
+    Password,
+    Withdraw,
+
+    TotalStates
+};
+
+extern int BankState; //
 /*****************************   Functions   *******************************/
 
 /****************************** End Of Module *******************************/

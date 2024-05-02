@@ -21,6 +21,7 @@
 #include "adc.h"
 #include "flags.h"
 #include "global_def.h"
+#include "keypad.h"
 #include "lcd.h"
 #include "leds.h"
 #include "queue.h"
@@ -39,6 +40,8 @@
 enum Stack_size { USERTASK_STACK_SIZE = configMINIMAL_STACK_SIZE };
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
+
+BankState = Welcome;
 
 /*****************************   Constants   *******************************/
 
@@ -59,11 +62,13 @@ int main() {
     }
 
     // Queue with 10 elements of uint8_t-type + semaphore
-    xLCDQueue      = xQueueCreate(10, sizeof(uint8_t));
-    xLCDSemaphore  = xSemaphoreCreateBinary();
+    xLCDQueue           = xQueueCreate(10, sizeof(uint8_t));
+    xLCDSemaphore       = xSemaphoreCreateBinary();
 
-  //  xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
-  //  xUARTSemaphore = xSemaphoreCreateBinary();
+    xBankStateSemaphore = xSemaphoreCreateBinary();
+
+    //  xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
+    //  xUARTSemaphore = xSemaphoreCreateBinary();
 
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
@@ -75,11 +80,14 @@ int main() {
                 Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(keypad_task,"Keypad", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-
+    xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
+                NULL);
 
     xSemaphoreGive(xLCDSemaphore);
-    //xSemaphoreGive(xUARTSemaphore);
+
+    xSemaphoreGive(xBankStateSemaphore);
+
+    // xSemaphoreGive(xUARTSemaphore);
 
     vTaskStartScheduler();
 
