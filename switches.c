@@ -109,7 +109,7 @@ void sw1_debouncer() {
         if (debounce_counter == Debounce_time) {
             xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
             state = 'P';
-            xQueueSend(xLCDQueue, &state, portMAX_DELAY);
+            xQueueSend(xLCDQueue, &state, (TickType_t)0);
             xSemaphoreGive(xLCDSemaphore);
         }
         old_press = GPIO_PORTF_DATA_R;
