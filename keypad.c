@@ -17,6 +17,10 @@
 
 /***************************** Include files *******************************/
 
+#include "FreeRTOS.h"
+#include "global_def.h"
+#include "queue.h"
+#include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
@@ -33,13 +37,27 @@
 #define rowY3 0x04;
 #define rowY4 0x08;
 
-/*****************************   Constants   *******************************/
+enum Commands {
+    CLEAR 0x00
+}
 
+<<<<<<< HEAD
+=======
+/*****************************   Constants   *******************************/
+char **keypadArr;
+
+// QueueHandle_t     xLCDQueue;
+// SemaphoreHandle_t xLCDSemaphore;
+>>>>>>> ff6033a (Updated with FreeRTOS)
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
+<<<<<<< HEAD
 void init_keypad() {
+=======
+void init_keypad_and_arr() {
+>>>>>>> ff6033a (Updated with FreeRTOS)
     if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
         SYSCTL_RCGC2_R =
             SYSCTL_RCGC2_R | SYSCTL_RCGC2_GPIOA | SYSCTL_RCGC2_GPIOE;
@@ -56,8 +74,14 @@ void init_keypad() {
 
     // PORT A as outputs
     GPIO_PORTA_DIR_R |= 0X1C;
+
+    // Make an array for the keypad
+    keypadArr =
+        createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
+    fillKeypadArr(keypadArr);
 }
 
+<<<<<<< HEAD
 void keypad_task(void *pvParameters) {
 
     // uint8_t rowData =
@@ -84,9 +108,87 @@ void keypad_task(void *pvParameters) {
                             // while(1){}
                         }
                         rowCheckVal <<= 1;
+=======
+char **createArray(int m, int n) { // m = rows, n = columns
+
+    // Values is the initial "box" of pointers. It has the size of
+    // m*n*sizeof(int). Thereby it should be able to contain all the values
+    // needed.
+    char *values = (char *)(calloc(m * n, sizeof(char)));
+
+    // Error check. If values is a null pointer the function returns NULL
+    if (values == NULL) {
+        printf("Memory allocation failed for values!\n");
+        return NULL;
+    }
+
+    // Rows is the "Start" of all the 2D arrays created within values.
+    char **rowsInit = (char **)(malloc(m * sizeof(char *)));
+    // Error check. If rows is a null pointer the function returns NULL
+    if (rowsInit == NULL) {
+        printf("Memory allocation failed for rows!\n");
+        free(values); // Free previously allocated memory
+        return NULL;
+    }
+
+    for (int i = 0; i < m; i++) {
+        rowsInit[i] =
+            values + i * n; // Calculate memory address, corresponding to the
+                            // i'th row in the values block. i * n is the offset
+                            // to reach the start of the i'th row
+    }
+    return rowsInit;
+}
+
+void destroyArray(char **arr) {
+    free(*arr); // Free the space
+    free(arr);
+}
+
+void fillKeypadArr(char **arr) {
+    arr[0][0] = '1';
+    arr[0][1] = '2';
+    arr[0][2] = '3';
+    arr[1][0] = '4';
+    arr[1][1] = '5';
+    arr[1][2] = '6';
+    arr[2][0] = '7';
+    arr[2][1] = '8';
+    arr[2][2] = '9';
+    arr[3][0] = '*';
+    arr[3][1] = '0';
+    arr[3][2] = '#';
+}
+
+void keypad_press() {
+    uint8_t colCheckVal =
+        0x04; // This value corresponds with the first GPIO port and will be
+              // bitshifted to correspond with the next
+    char keypadPressVal;
+    int  i = 0;
+
+    for (i = 0; i < cols; i++) {
+
+        uint8_t rowCheckVal =
+            0x01; // This value corresponds with the first GPIO port and will be
+                  // bitshifted to correspond with the next
+        int j = 0;
+        GPIO_PORTA_DATA_R &= CLEAR;
+        GPIO_PORTA_DATA_R |= colCheckVal;
+
+        switch (colCheckVal) {
+            case colX1: {
+                for (j = 0; j < rows; j++) {
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
+                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        keypadPressVal = keypadArr[j][i];
+                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
+                        xSemaphoreGive(xLCDSemaphore);
+>>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
+<<<<<<< HEAD
                 case colX2: {
                     for (j = 0; j < rows; j++) {
                         if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
@@ -96,9 +198,21 @@ void keypad_task(void *pvParameters) {
                             // while(1){}
                         }
                         rowCheckVal <<= 1;
+=======
+                break;
+            }
+            case colX2: {
+                for (j = 0; j < rows; j++) {
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
+                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        keypadPressVal = keypadArr[j][i];
+                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
+                        xSemaphoreGive(xLCDSemaphore);
+>>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
+<<<<<<< HEAD
                 case colX3: {
                     for (j = 0; j < rows; j++) {
                         if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
@@ -108,16 +222,47 @@ void keypad_task(void *pvParameters) {
                             // while(1){}
                         }
                         rowCheckVal <<= 1;
+=======
+                break;
+            }
+            case colX3: {
+                for (j = 0; j < rows; j++) {
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
+                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        keypadPressVal = keypadArr[j][i];
+                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
+                        xSemaphoreGive(xLCDSemaphore);
+>>>>>>> ff6033a (Updated with FreeRTOS)
                     }
                     break;
                 }
                 default:
                     break;
             }
+<<<<<<< HEAD
             colCheckVal <<= 1;
             // TODO: Make this in a for-loop
         }
     }
 }
+=======
+            default:
+                break;
+        }
+        colCheckVal <<= 1;
+    }
+}
+
+void keypad_task(void *pvParameters) {
+
+    init_keypad_and_arr();
+    // uint8_t rowData =
+    // int matrix[3][4] = {0};
+    while (1) {
+        keypad_press();
+    }
+    destroyArray();
+}
+>>>>>>> ff6033a (Updated with FreeRTOS)
 
 /****************************** End Of Module *******************************/
