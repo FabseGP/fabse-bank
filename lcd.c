@@ -145,12 +145,14 @@ void lcd_task(void *pvParameters) {
     lcd_send(Bottom_line, Instruction);
 
     while (1) {
+        /*
         uint8_t data;
         if (xQueueReceive(xLCDQueue, &data, portMAX_DELAY) == pdPASS) {
             xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
             lcd_send(data, Output);
             xSemaphoreGive(xLCDSemaphore);
         }
+        */
     }
 }
 
