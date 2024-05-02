@@ -17,10 +17,6 @@
 
 /***************************** Include files *******************************/
 
-#include "FreeRTOS.h"
-#include "global_def.h"
-#include "queue.h"
-#include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
@@ -81,9 +77,6 @@ void keypad_task(void *pvParameters) {
                 case colX1: {
                     for (j = 0; j < rows; j++) {
                         if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                            xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
-                            xQueueSend(xLCDQueue, &j, portMAX_DELAY);
-                            xSemaphoreGive(xLCDSemaphore);
                             // matrix[i][j] = 1; // Maybe put in queue here
 
                             // Toggle red led

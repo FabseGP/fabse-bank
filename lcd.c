@@ -18,7 +18,6 @@
 /***************************** Include files *******************************/
 
 #include "FreeRTOS.h"
-#include "global_def.h"
 #include "queue.h"
 #include "rotary.h"
 #include "semphr.h"
@@ -133,7 +132,7 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
-    char fabse_text[] = "Get linux! >:(";
+    char fabse_text[] = "hail fabse";
 
     // somehow using "char i = 0" in the for loops result in an error, need to
     // define it outside
@@ -146,13 +145,12 @@ void lcd_task(void *pvParameters) {
     lcd_send(Bottom_line, Instruction);
 
     while (1) {
-        /*
         uint8_t data;
         if (xQueueReceive(xLCDQueue, &data, portMAX_DELAY) == pdPASS) {
             xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
             lcd_send(data, Output);
             xSemaphoreGive(xLCDSemaphore);
-        }*/
+        }
     }
 }
 
