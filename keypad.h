@@ -31,12 +31,19 @@
 
 /*****************************   Functions   *******************************/
 
-void init_keypad();
+void init_keypad_and_arr();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
  *   Function : init keypad
  ******************************************************************************/
+char** createArray(int, int);
+
+void destroyArray(char**);
+
+void fillKeypadArr(char**);
+
+void keypad_press();
 
 void keypad_task(void* pvParameters);
 /*****************************************************************************
