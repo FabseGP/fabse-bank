@@ -57,14 +57,22 @@ int main() {
         // 1 = 4 ms, 250 = 1 s (setting the prescaler)
         init_timer1a(250);
     }
+    // 9600 baudrate, 8 data-bits, 1 stop-bit and no parity
+    uart0_init(9600, 8, 1, 'n');
 
     // Queue with 10 elements of uint8_t-type + semaphore
-    xLCDQueue     = xQueueCreate(10, sizeof(uint8_t));
-    xLCDSemaphore = xSemaphoreCreateBinary();
-    /*
-            xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
-            xUARTSemaphore = xSemaphoreCreateBinary();
-     */
+    xLCDQueue      = xQueueCreate(10, sizeof(uint8_t));
+    xLCDSemaphore  = xSemaphoreCreateBinary();
+
+    xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xUARTSemaphore = xSemaphoreCreateBinary();
+
+    if (xUARTQueue == NULL) {
+        while (1) {
+            uart_putc('N');
+        }
+    }
+
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
     xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
@@ -77,7 +85,7 @@ int main() {
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
 
     xSemaphoreGive(xLCDSemaphore);
-    //   xSemaphoreGive(xUARTSemaphore);
+    xSemaphoreGive(xUARTSemaphore);
 
     vTaskStartScheduler();
 
