@@ -132,7 +132,7 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
-    char fabse_text[] = "hail fabse";
+    char fabse_text[] = "kom hid pengende venter";
 
     // somehow using "char i = 0" in the for loops result in an error, need to
     // define it outside
