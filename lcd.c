@@ -132,7 +132,10 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
-    char fabse_text[] = "kom hid pengende venter";
+    char fabse_text[] = "velkommen til";
+    char fabse_text2[] = "fabses bank";
+     char fabse_text4[] = "kom hid";
+      char fabse_text4[] = "pengene venter";
 
     // somehow using "char i = 0" in the for loops result in an error, need to
     // define it outside
@@ -144,6 +147,23 @@ void lcd_task(void *pvParameters) {
 
     lcd_send(Bottom_line, Instruction);
 
+    for (i = 0; i < strlen(fabse_text2); i++) {
+          lcd_send(fabse_text2[i], Output);
+      }
+
+      vTaskDelay(2000 / portTICK_RATE_MS);
+
+    lcd_send(Clear, Instruction);
+
+for (i = 0; i < strlen(fabse_text3); i++) {
+        lcd_send(fabse_text3[i], Output);
+    }
+
+    lcd_send(Bottom_line, Instruction);
+
+    for (i = 0; i < strlen(fabse_text4); i++) {
+          lcd_send(fabse_text4[i], Output);
+      }
     while (1) {
         uint8_t data;
         if (xQueueReceive(xLCDQueue, &data, portMAX_DELAY) == pdPASS) {
