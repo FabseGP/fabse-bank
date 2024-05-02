@@ -132,11 +132,11 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
-    char fabse_text[] = "Welcome too";
+    char fabse_text[]  = "Welcome too";
     char fabse_text2[] = "Fabses bank";
-    
-     char fabse_text3[] = "come closer";
-      char fabse_text4[] = "money awaits";
+
+    char fabse_text3[] = "come closer";
+    char fabse_text4[] = "money awaits";
 
     // somehow using "char i = 0" in the for loops result in an error, need to
     // define it outside
@@ -149,22 +149,22 @@ void lcd_task(void *pvParameters) {
     lcd_send(Bottom_line, Instruction);
 
     for (i = 0; i < strlen(fabse_text2); i++) {
-          lcd_send(fabse_text2[i], Output);
-      }
+        lcd_send(fabse_text2[i], Output);
+    }
 
-      vTaskDelay(2000 / portTICK_RATE_MS);
+    vTaskDelay(2000 / portTICK_RATE_MS);
 
     lcd_send(Clear, Instruction);
 
-for (i = 0; i < strlen(fabse_text3); i++) {
+    for (i = 0; i < strlen(fabse_text3); i++) {
         lcd_send(fabse_text3[i], Output);
     }
 
     lcd_send(Bottom_line, Instruction);
 
     for (i = 0; i < strlen(fabse_text4); i++) {
-          lcd_send(fabse_text4[i], Output);
-      }
+        lcd_send(fabse_text4[i], Output);
+    }
     while (1) {
         uint8_t data;
         if (xQueueReceive(xLCDQueue, &data, (TickType_t)10) == pdPASS) {

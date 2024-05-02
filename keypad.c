@@ -23,6 +23,7 @@
 #include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
+#include <stdlib.h>
 
 /*****************************    Defines    *******************************/
 
@@ -32,14 +33,12 @@
 #define colX2 0x08
 #define colX3 0x10
 
-#define rowY1 0x01;
-#define rowY2 0x02;
-#define rowY3 0x04;
-#define rowY4 0x08;
+#define rowY1 0x01
+#define rowY2 0x02
+#define rowY3 0x04
+#define rowY4 0x08
 
-enum Commands {
-    CLEAR 0x00
-}
+#define CLEAR 0x00
 
 /*****************************   Constants   *******************************/
 char **keypadArr;
@@ -49,6 +48,59 @@ char **keypadArr;
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
+
+char **createArray(int m, int n) { // m = rows, n = columns
+
+    // Values is the initial "box" of pointers. It has the size of
+    // m*n*sizeof(int). Thereby it should be able to contain all the values
+    // needed.
+    char *values = (char *)(calloc(m * n, sizeof(char)));
+
+    // Error check. If values is a null pointer the function returns NULL
+    if (values == NULL) {
+        //printf("Memory allocation failed for values!\n");
+        return NULL;
+    }
+
+    // Rows is the "Start" of all the 2D arrays created within values.
+    char **rowsInit = (char **)(malloc(m * sizeof(char *)));
+    // Error check. If rows is a null pointer the function returns NULL
+    if (rowsInit == NULL) {
+        //printf("Memory allocation failed for rows!\n");
+        free(values); // Free previously allocated memory
+        return NULL;
+    }
+    int i;
+    for (i = 0; i < m; i++) {
+        rowsInit[i] =
+            values + i * n; // Calculate memory address, corresponding to the
+                            // i'th row in the values block. i * n is the offset
+                            // to reach the start of the i'th row
+    }
+    return rowsInit;
+}
+
+void destroyArray(char **arr) {
+    free(*arr); // Free the space
+    free(arr);
+}
+
+
+void fillKeypadArr(char **arr) {
+    arr[0][0] = '1';
+    arr[0][1] = '2';
+    arr[0][2] = '3';
+    arr[1][0] = '4';
+    arr[1][1] = '5';
+    arr[1][2] = '6';
+    arr[2][0] = '7';
+    arr[2][1] = '8';
+    arr[2][2] = '9';
+    arr[3][0] = '*';
+    arr[3][1] = '0';
+    arr[3][2] = '#';
+}
+
 
 void init_keypad_and_arr() {
     if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
@@ -72,57 +124,6 @@ void init_keypad_and_arr() {
     keypadArr =
         createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
     fillKeypadArr(keypadArr);
-}
-
-char **createArray(int m, int n) { // m = rows, n = columns
-
-    // Values is the initial "box" of pointers. It has the size of
-    // m*n*sizeof(int). Thereby it should be able to contain all the values
-    // needed.
-    char *values = (char *)(calloc(m * n, sizeof(char)));
-
-    // Error check. If values is a null pointer the function returns NULL
-    if (values == NULL) {
-        printf("Memory allocation failed for values!\n");
-        return NULL;
-    }
-
-    // Rows is the "Start" of all the 2D arrays created within values.
-    char **rowsInit = (char **)(malloc(m * sizeof(char *)));
-    // Error check. If rows is a null pointer the function returns NULL
-    if (rowsInit == NULL) {
-        printf("Memory allocation failed for rows!\n");
-        free(values); // Free previously allocated memory
-        return NULL;
-    }
-
-    for (int i = 0; i < m; i++) {
-        rowsInit[i] =
-            values + i * n; // Calculate memory address, corresponding to the
-                            // i'th row in the values block. i * n is the offset
-                            // to reach the start of the i'th row
-    }
-    return rowsInit;
-}
-
-void destroyArray(char **arr) {
-    free(*arr); // Free the space
-    free(arr);
-}
-
-void fillKeypadArr(char **arr) {
-    arr[0][0] = '1';
-    arr[0][1] = '2';
-    arr[0][2] = '3';
-    arr[1][0] = '4';
-    arr[1][1] = '5';
-    arr[1][2] = '6';
-    arr[2][0] = '7';
-    arr[2][1] = '8';
-    arr[2][2] = '9';
-    arr[3][0] = '*';
-    arr[3][1] = '0';
-    arr[3][2] = '#';
 }
 
 void keypad_press() {
@@ -149,8 +150,8 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
+                        break;
                     }
-                    break;
                 }
                 break;
             }
@@ -161,8 +162,8 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
+                        break;
                     }
-                    break;
                 }
                 break;
             }
@@ -173,11 +174,10 @@ void keypad_press() {
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
+                        break;
                     }
-                    break;
                 }
-                default:
-                    break;
+                break;
             }
             default:
                 break;
@@ -194,7 +194,7 @@ void keypad_task(void *pvParameters) {
     while (1) {
         keypad_press();
     }
-    destroyArray();
+    destroyArray(keypadArr);
 }
 
 /****************************** End Of Module *******************************/
