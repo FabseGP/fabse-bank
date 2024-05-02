@@ -106,26 +106,6 @@ uint32_t lcrh_parity(uint8_t parity) {
     return result;
 }
 
-void uart0_fifos_enable() {
-    /*****************************************************************************
-     *   Input    :
-     *   Output   :
-     *   Function : Enable the tx and rx fifos
-     ******************************************************************************/
-
-    UART0_LCRH_R |= 0x00000010;
-}
-
-void uart0_fifos_disable() {
-    /*****************************************************************************
-     *   Input    :
-     *   Output   :
-     *   Function : Enable the tx and rx fifos
-     ******************************************************************************/
-
-    UART0_LCRH_R &= 0xFFFFFFEF;
-}
-
 unsigned char uart0_rx_rdy() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -164,14 +144,25 @@ void uart0_init(uint32_t baud_rate, uint8_t data_size, uint8_t stop_bits,
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA; // Enable clock for Port A
-    SYSCTL_RCGC1_R |= SYSCTL_RCGC1_UART0; // Enable clock for UART 0
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
+    }
+
+    if (SYSCTL_RCGC1_R != SYSCTL_RCGC1_UART0) {
+        SYSCTL_RCGC1_R |= SYSCTL_RCGC1_UART0;
+    }
 
     // Set PA0 and PA1 to alternativ function (uart0)
     GPIO_PORTA_AFSEL_R |= 0x00000003;
-    GPIO_PORTA_DIR_R |= 0x00000002; // Set PA1 (uart0 tx) to output
-    GPIO_PORTA_DIR_R &= 0xFFFFFFFE; // Set PA0 (uart0 rx) to input
-    GPIO_PORTA_DEN_R |= 0x00000003; // Snable digital operation of PA0 and PA1
+
+    // Set PA1 (uart0 tx) to output
+    GPIO_PORTA_DIR_R |= 0x00000002;
+
+    // Set PA0 (uart0 rx) to input
+    GPIO_PORTA_DIR_R &= 0xFFFFFFFE;
+
+    // Snable digital operation of PA0 and PA1
+    GPIO_PORTA_DEN_R |= 0x00000003;
 
     // X-sys*64/(16*baudrate) = 16M*4/baudrate
     uint32_t BRD = 64000000 / baud_rate;
@@ -183,9 +174,14 @@ void uart0_init(uint32_t baud_rate, uint8_t data_size, uint8_t stop_bits,
     UART0_LCRH_R += lcrh_stopbits(stop_bits);
     UART0_LCRH_R += lcrh_parity(parity);
 
-    uart0_fifos_disable();
+    // Disable fifos
+    UART0_LCRH_R &= 0xFFFFFFEF;
 
-    UART0_CTL_R |= (UART_CTL_UARTEN | UART_CTL_TXE); // Enable UART
+    // Enable fifos
+    UART0_LCRH_R |= 0x00000010;
+
+    // Enable UART
+    UART0_CTL_R |= (UART_CTL_UARTEN | UART_CTL_TXE);
 }
 
 void uart0_task(void *pvParameters) {
@@ -193,15 +189,19 @@ void uart0_task(void *pvParameters) {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
+    // 9600 baudrate, 8 data-bits, 1 stop-bit and no parity
+    uart0_init(9600, 8, 1, 'n');
+
     while (1) {
         /*
-        uint8_t data;
-        if (xQueueReceive(xUARTQueue, &data, (TickType_t)10) == pdPASS) {
-            xSemaphoreTake(xUARTSemaphore, (TickType_t)10);
-            uart0_putc(data);
-            xSemaphoreGive(xUARTSemaphore);
-        }*/
+                uint8_t data;
+                if (xQueueReceive(xUARTQueue, &data, (TickType_t)10) == pdPASS)
+           { xSemaphoreTake(xUARTSemaphore, (TickType_t)10); uart0_putc(data);
+                    xSemaphoreGive(xUARTSemaphore);
+                }
+        */
     }
 }
 
-/****************************** End Of Module *******************************/
+/****************************** End Of Module
+ * *******************************/

@@ -41,11 +41,14 @@
 #define CLEAR 0x00
 
 /*****************************   Constants   *******************************/
+
 char **keypadArr;
 
 // QueueHandle_t     xLCDQueue;
 // SemaphoreHandle_t xLCDSemaphore;
+
 /*****************************   Variables   *******************************/
+
 char              passwordArr[4]  = {0, 0, 0, 0};
 int               passwordCounter = 0;
 char              moneyArr[4]     = {0, 0, 0, 0};
@@ -106,9 +109,11 @@ void fillKeypadArr(char **arr) {
 }
 
 void init_keypad_and_arr() {
-    if (SYSCTL_RCGC0_R != SYSCTL_RCGC0_ADC0) {
-        SYSCTL_RCGC2_R =
-            SYSCTL_RCGC2_R | SYSCTL_RCGC2_GPIOA | SYSCTL_RCGC2_GPIOE;
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
+    }
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOE) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOE;
     }
 
     // Enable GPIO pins,
@@ -278,6 +283,7 @@ void keypad_press() {
         colCheckVal <<= 1;
     }
 }
+
 void keypad_task(void *pvParameters) {
 
     init_keypad_and_arr();

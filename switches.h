@@ -31,32 +31,32 @@
 
 /*****************************   Functions   *******************************/
 
-void init_sw1();
+void init_switches();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Initialize sw1 as output with pullup-resistor
+ *   Function : Initialize sw1 & sw2 as output with pullup-resistor
  ******************************************************************************/
 
-void init_sw1_interrupt();
+void init_switches_interrupt();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
  *   Function : Initialize interrupt vector 30 (sw1)
  ******************************************************************************/
 
-void sw1_debouncer();
+void switch_debouncer();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
  *   Function : Debouncer for sw1
  ******************************************************************************/
 
-void sw1_interrupt_handler();
+void switch_interrupt_handler();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Handler when falling edge on sw1
+ *   Function : Handler when falling edge on sw1 & sw2
  ******************************************************************************/
 
 /****************************** End Of Module *******************************/

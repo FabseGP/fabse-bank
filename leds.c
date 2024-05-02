@@ -64,7 +64,6 @@ void red_led_task(void *pvParameters) {
      *****************************************************************************/
 
     while (1) {
-        // Toggle red led
         GPIO_PORTF_DATA_R ^= 0x02;
         uint16_t     adc_value = get_adc();
         portTickType delay     = 1000 - adc_value / 5;
@@ -79,9 +78,7 @@ void yellow_led_task(void *pvParameters) {
      *****************************************************************************/
 
     while (1) {
-        // Toggle yellow led
         GPIO_PORTF_DATA_R ^= 0x04;
-        // Wait 1000 ms
         vTaskDelay(1000 / portTICK_RATE_MS);
     }
 }
@@ -92,9 +89,7 @@ void green_led_task(void *pvParameters) {
      *****************************************************************************/
 
     while (1) {
-        // Toggle green led
         GPIO_PORTF_DATA_R ^= 0x08;
-        // Wait 1500 ms
         vTaskDelay(1500 / portTICK_RATE_MS);
     }
 }
@@ -105,9 +100,7 @@ void status_led_task(void *pvParameters) {
      *****************************************************************************/
 
     while (1) {
-        // Toggle status led
         GPIO_PORTD_DATA_R ^= 0x40;
-        // Wait 500 ms
         vTaskDelay(500 / portTICK_RATE_MS);
     }
 }

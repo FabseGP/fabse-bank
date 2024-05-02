@@ -53,7 +53,7 @@ int main() {
 
     init_systick();
     init_adc();
-    init_sw1();
+    init_switches();
     init_leds();
     init_rotary();
     if (Timer1a_on == 1) {
@@ -65,10 +65,10 @@ int main() {
     xLCDQueue           = xQueueCreate(10, sizeof(uint8_t));
     xLCDSemaphore       = xSemaphoreCreateBinary();
 
-    xBankStateSemaphore = xSemaphoreCreateBinary();
+    xUARTQueue          = xQueueCreate(10, sizeof(uint8_t));
+    xUARTSemaphore      = xSemaphoreCreateBinary();
 
-    //  xUARTQueue     = xQueueCreate(10, sizeof(uint8_t));
-    //  xUARTSemaphore = xSemaphoreCreateBinary();
+    xBankStateSemaphore = xSemaphoreCreateBinary();
 
     xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
                 Low_prio, NULL);
@@ -80,14 +80,12 @@ int main() {
                 Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
-                NULL);
+    // xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // NULL);
 
     xSemaphoreGive(xLCDSemaphore);
-
     xSemaphoreGive(xBankStateSemaphore);
-
-    // xSemaphoreGive(xUARTSemaphore);
+    xSemaphoreGive(xUARTSemaphore);
 
     vTaskStartScheduler();
 

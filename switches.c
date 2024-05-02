@@ -27,7 +27,7 @@
 
 /*****************************    Defines    *******************************/
 
-enum Sw1_debouncer { Debounce_time = 50, Clear_interrupt = 0x10, Clear = 0 };
+enum Sw1_debouncer { Debounce_time = 40, Clear_interrupt = 0x11, Clear = 0 };
 
 /*****************************   Constants   *******************************/
 
@@ -35,7 +35,7 @@ enum Sw1_debouncer { Debounce_time = 50, Clear_interrupt = 0x10, Clear = 0 };
 
 /*****************************   Functions   *******************************/
 
-void init_sw1() {
+void init_switches() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
@@ -44,16 +44,20 @@ void init_sw1() {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
     }
 
-    // Enable the GPIO pins for digital function (PF4)
-    GPIO_PORTF_DEN_R |= 0x10;
+    // Unlock sw2
+    GPIO_PORTF_LOCK_R = 0x4C4F434B;
+    GPIO_PORTF_CR_R   = 0x1F;
 
-    // Enable internal pull-up (PF4).
-    GPIO_PORTF_PUR_R |= 0x10;
+    // Enable the GPIO pins for digital function (PF4 & PF0)
+    GPIO_PORTF_DEN_R |= 0x11;
 
-    init_sw1_interrupt();
+    // Enable internal pull-up (PF4 & PF0).
+    GPIO_PORTF_PUR_R |= 0x11;
+
+    init_switches_interrupt();
 }
 
-void init_sw1_interrupt() {
+void init_switches_interrupt() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
@@ -61,18 +65,18 @@ void init_sw1_interrupt() {
     // Table 10-4 have a good overview of the interrupt registers
 
     // if cleared = detect falling/rising edges, otherwise low/high levels
-    GPIO_PORTF_IS_R &= ~(0x10);
+    GPIO_PORTF_IS_R &= ~(0x11);
 
     // if cleared = can adjust if interrupted on falling or rising edges
     // otherwise on both falling and rising edges
-    GPIO_PORTF_IBE_R &= ~(0x10);
+    GPIO_PORTF_IBE_R &= ~(0x11);
 
     // if cleared = interrupt on falling edge
-    GPIO_PORTF_IEV_R &= ~(0x10);
+    GPIO_PORTF_IEV_R &= ~(0x11);
 
     // allows interrupts to (quote from datasheet) "be sent to the interrupt
     // controller on the combined interrupt signal"
-    GPIO_PORTF_IM_R |= 0x10;
+    GPIO_PORTF_IM_R |= 0x11;
 
     // clears any previous interrupts on pin PF4
     GPIO_PORTF_ICR_R |= Clear_interrupt;
@@ -88,17 +92,12 @@ void init_sw1_interrupt() {
     NVIC_EN0_R |= (1 << 30);
 }
 
-void sw1_debouncer() {
+void switch_debouncer() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t debounce_counter = 0, old_press = 0, state;
-
-    // Clears any previous interrupts on pin PF4
-    GPIO_PORTF_ICR_R |= Clear_interrupt;
-
-    old_press = GPIO_PORTF_DATA_R;
+    uint8_t debounce_counter = 0, old_press = GPIO_PORTF_DATA_R;
 
     while (debounce_counter < Debounce_time) {
         if (GPIO_PORTF_DATA_R & old_press) {
@@ -108,20 +107,23 @@ void sw1_debouncer() {
         }
         if (debounce_counter == Debounce_time) {
             xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
-            state = 'P';
+            uint8_t state = 'P';
             xQueueSend(xLCDQueue, &state, (TickType_t)0);
             xSemaphoreGive(xLCDSemaphore);
         }
         old_press = GPIO_PORTF_DATA_R;
     }
+
+    // Clears any previous interrupts on pin PF4 & PF0
+    GPIO_PORTF_ICR_R |= Clear_interrupt;
 }
 
-void sw1_interrupt_handler() {
+void switch_interrupt_handler() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    sw1_debouncer();
+    switch_debouncer();
 }
 
 /****************************** End Of Module *******************************/
