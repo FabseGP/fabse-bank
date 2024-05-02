@@ -19,6 +19,7 @@
 
 #include "rotary.h"
 #include "FreeRTOS.h"
+#include "global_def.h"
 #include "queue.h"
 #include "semphr.h"
 #include "tm4c123gh6pm.h"
@@ -35,22 +36,13 @@ enum States { Clear_interrupt = 0x20 };
 
 /*****************************   Functions   *******************************/
 
-void enable_porta() {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    // Enable the GPIO port that is used for the digiswitch
-    SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
-}
-
 void init_rotary() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
     if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
-        enable_porta();
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
     }
 
     // Enable the GPIO pins for digital function (PA5 - PA7)
@@ -94,15 +86,9 @@ void rotary_interrupt_handler() {
 
     // checks if PA5 and PA6 have the same state
     if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
-        xSemaphoreTake(xUARTSemaphore, portMAX_DELAY);
         direction = 'P';
-        xQueueSend(xUARTQueue, &direction, portMAX_DELAY);
-        xSemaphoreGive(xUARTSemaphore);
     } else {
-        xSemaphoreTake(xUARTSemaphore, portMAX_DELAY);
         direction = 'R';
-        xQueueSend(xUARTQueue, &direction, portMAX_DELAY);
-        xSemaphoreGive(xUARTSemaphore);
     }
 
     GPIO_PORTA_ICR_R |=
