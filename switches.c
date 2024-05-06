@@ -27,7 +27,16 @@
 
 /*****************************    Defines    *******************************/
 
-enum Sw1_debouncer { Debounce_time = 40, Clear_interrupt = 0x11, Clear = 0 };
+enum Sw1_debouncer {
+    Debounce_time   = 40,
+    Clear_interrupt = 0x11,
+    Clear           = 0,
+    SW1             = 0x10,
+    SW2             = 0x01
+};
+
+QueueHandle_t     xSW1Queue, xSW2Queue;
+SemaphoreHandle_t xSW1Semaphore, xSW2Semaphore;
 
 /*****************************   Constants   *******************************/
 
@@ -106,10 +115,16 @@ void switch_debouncer() {
             debounce_counter = Clear;
         }
         if (debounce_counter == Debounce_time) {
-            xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
-            uint8_t state = 'P';
-            xQueueSend(xLCDQueue, &state, (TickType_t)0);
-            xSemaphoreGive(xLCDSemaphore);
+            uint8_t button_press = 1;
+            if (GPIO_PORTF_DATA_R & SW1) {
+                xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
+                xQueueSend(xSW1Queue, &button_press, (TickType_t)10);
+                xSemaphoreGive(xSW1Semaphore);
+            } else if (GPIO_PORTF_DATA_R & SW2) {
+                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
+                xQueueSend(xSW2Queue, &button_press, (TickType_t)10);
+                xSemaphoreGive(xSW2Semaphore);
+            }
         }
         old_press = GPIO_PORTF_DATA_R;
     }

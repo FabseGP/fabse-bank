@@ -3,37 +3,40 @@
  * Embedded Programming (EMP)
  * Fabian Petrus
  *
- * MODULENAME.: flags.h
+ * MODULENAME.: money.h
  *
  * PROJECT....: fabse_bank
  *
- * DESCRIPTION: Toggle functionalities in code with flags
+ * DESCRIPTION: Asking the customer (politely) about their financial situation
  *
  * Change Log.:
  ******************************************************************************
  * Date    Id    Change
  * DDMMYY
  * --------------------
- * 260424  MoH    Module created
+ * 060624  MoH    Module created
  *
  *****************************************************************************/
 
-#ifndef _FLAGS_H_
-#define _FLAGS_H_
+#ifndef _MONEY_H
+#define _MONEY_H
 
 /***************************** Include files *******************************/
 
 /*****************************    Defines    *******************************/
-
-// 0 = use systick for delay
-// 1 = use timer1a for delay (can still use systick)
-enum Delay { Timer1a_on = 1 };
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
+
+void money_task(void *pvParameter);
+/*****************************************************************************
+ *   Input    : -
+ *   Output   : -
+ *   Function : Bankrupt the customer
+ ******************************************************************************/
 
 /****************************** End Of Module *******************************/
 

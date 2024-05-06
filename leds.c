@@ -19,6 +19,9 @@
 
 #include "FreeRTOS.h"
 #include "adc.h"
+#include "global_def.h"
+#include "queue.h"
+#include "semphr.h"
 #include "task.h"
 #include "tm4c123gh6pm.h"
 
@@ -65,10 +68,26 @@ void red_led_task(void *pvParameters) {
 
     while (1) {
         GPIO_PORTF_DATA_R ^= 0x02;
-        uint16_t     adc_value = get_adc();
-        portTickType delay     = 1000 - adc_value / 5;
+
+        /*
+        uint16_t adc_value;
+
+        // Start conversion at sequencer 3
+        ADC0_PSSI_R = 0x08;
+
+        if (xQueueReceive(xADCQueue, &adc_value, (TickType_t)10) == pdPASS) {
+            xSemaphoreTake(xADCSemaphore, (TickType_t)10);
+            // Wait 100-1000 ms (200-1000)
+            portTickType delay = 1000 - adc_value / 5;
+            vTaskDelay(delay / portTICK_RATE_MS);
+            xSemaphoreGive(xADCSemaphore);
+        } */
+
+        uint16_t adc_value = get_adc();
         // Wait 100-1000 ms (200-1000)
+        portTickType delay = 1000 - adc_value / 5;
         vTaskDelay(delay / portTICK_RATE_MS);
+        xSemaphoreGive(xADCSemaphore);
     }
 }
 

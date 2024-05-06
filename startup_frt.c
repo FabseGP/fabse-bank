@@ -36,6 +36,7 @@ static void IntDefaultHandler(void);
 void        switch_interrupt_handler();
 void        rotary_interrupt_handler();
 void        timer1a_interrupt_handler();
+void        adc0_interrupt_handler();
 
 //*****************************************************************************
 //
@@ -105,7 +106,7 @@ void (*const g_pfnVectors[])(void) = {
     IntDefaultHandler,         // ADC Sequence 0
     IntDefaultHandler,         // ADC Sequence 1
     IntDefaultHandler,         // ADC Sequence 2
-    IntDefaultHandler,         // ADC Sequence 3
+    adc0_interrupt_handler,    // ADC Sequence 3
     IntDefaultHandler,         // Watchdog timer
     IntDefaultHandler,         // Timer 0 subtimer A
     IntDefaultHandler,         // Timer 0 subtimer B
