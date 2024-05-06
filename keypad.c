@@ -40,12 +40,12 @@
 
 #define CLEAR 0x00
 
+QueueHandle_t     xKeypadQueue;
+SemaphoreHandle_t xKeypadSemaphore;
+
 /*****************************   Constants   *******************************/
 
 char **keypadArr;
-
-// QueueHandle_t     xLCDQueue;
-// SemaphoreHandle_t xLCDSemaphore;
 
 /*****************************   Variables   *******************************/
 

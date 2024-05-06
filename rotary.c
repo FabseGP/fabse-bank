@@ -30,6 +30,9 @@
 
 enum States { Clear_interrupt = 0x20 };
 
+QueueHandle_t     xRotaryQueue;
+SemaphoreHandle_t xRotarySemaphore;
+
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
@@ -88,13 +91,15 @@ void rotary_interrupt_handler() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t direction = 'N';
-
     // Checks if PA5 and PA6 have the same state
     if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
-        direction = 'L';
+        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+        xQueueSend(xRotaryQueue, 'L', (TickType_t)10);
+        xSemaphoreGive(xRotarySemaphore);
     } else {
-        direction = 'R';
+        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+        xQueueSend(xRotaryQueue, 'R', (TickType_t)10);
+        xSemaphoreGive(xRotarySemaphore);
     }
 
     // Clears any previous interrupts on PA5

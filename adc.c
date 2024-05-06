@@ -17,12 +17,22 @@
 
 /***************************** Include files *******************************/
 
+#include "FreeRTOS.h"
+#include "queue.h"
+#include "semphr.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
 /*****************************    Defines    *******************************/
 
+QueueHandle_t     xADCQueue;
+SemaphoreHandle_t xADCSemaphore;
+
 /*****************************   Constants   *******************************/
+
+enum Adc {
+    Clear_interrupt = 0x08,
+};
 
 /*****************************   Variables   *******************************/
 
@@ -68,11 +78,35 @@ void init_adc() {
     // ADC sample sequence control 3 = END0
     ADC0_SSCTL3_R = 0x00000002;
 
+    // Unmask ADC-interrupt
+    ADC0_IM_R |= 0x08;
+
+    // Table 2-9 in the datasheets shows the interrupt-number for ADC0 Sequence
+    // 3 as 17
+    NVIC_EN0_R |= (1 << 17);
+
+    // clears any previous interrupts on ADC0 Sequencer 3
+    ADC0_ISC_R |= Clear_interrupt;
+
     // Enable sequencer 3
     ADC0_ACTSS_R = 0x00000008;
 
     // Start conversion at sequencer 3
     ADC0_PSSI_R = 0x08;
+}
+
+void adc0_interrupt_handler() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    xSemaphoreTake(xADCSemaphore, (TickType_t)10);
+    uint16_t adc_value = ADC0_SSFIFO3_R;
+    xQueueSend(xADCQueue, &adc_value, (TickType_t)10);
+    xSemaphoreGive(xADCSemaphore);
+
+    // Clears any previous interrupts on ADC0
+    ADC0_ISC_R |= Clear_interrupt;
 }
 
 /****************************** End Of Module *******************************/
