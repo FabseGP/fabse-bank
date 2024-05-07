@@ -97,19 +97,21 @@ int main() {
         init_timer1a(250);
     }
 
-    xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
-                Low_prio, NULL);
-    xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
-                NULL);
-    xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
-                Low_prio, NULL);
-    xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
-                Low_prio, NULL);
+    // xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
+    //             Low_prio, NULL);
+    // xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
+    //             NULL);
+    // xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
+    //             Low_prio, NULL);
+    // xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
+    //             Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // NULL);
+    //  xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+    //            NULL);
+    xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
-    xTaskCreate(keypad_task, "Keypad", 2048, NULL, Low_prio, NULL);
 
     vTaskStartScheduler();
 

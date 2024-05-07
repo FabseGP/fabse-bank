@@ -93,10 +93,10 @@ void balance() {
         } else {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
                 pdPASS) {
-                index++;
                 xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                 xQueueSend(xLCDQueue, &amount[index], (TickType_t)0);
                 xSemaphoreGive(xLCDSemaphore);
+                index++;
             }
         }
     }
