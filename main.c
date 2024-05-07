@@ -49,16 +49,6 @@ BankState = Money;
 
 /*****************************   Functions   *******************************/
 
-void a_task(void *pvParameters) {
-    while (1) {
-        char a = 'a';
-
-        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-        xQueueSend(xLCDQueue, &a, (TickType_t)0);
-        xSemaphoreGive(xLCDSemaphore);
-    }
-}
-
 void init_queues_semaphores() {
     // Queue with x elements of uint8_t-type + semaphore
     xLCDQueue           = xQueueCreate(100, sizeof(uint8_t));
@@ -107,17 +97,14 @@ int main() {
         init_timer1a(250);
     }
 
-    //  xTaskCreate(led_task, "led_task", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //        NULL);
+    // xTaskCreate(led_task, "led_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+    //             NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    //  xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL,
-    //  Low_prio, NULL);
-    //   xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE,
-    //   NULL, Low_prio,
-    //              NULL);
-    //  xTaskCreate(keypad_task, "Keypad", 2048, NULL, Low_prio,
-    //  NULL);
-    xTaskCreate(a_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    // xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // NULL); xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL,
+    // Low_prio,
+    //             NULL);
+    xTaskCreate(keypad_task, "Keypad", 1024, NULL, Low_prio, NULL);
 
     vTaskStartScheduler();
 
