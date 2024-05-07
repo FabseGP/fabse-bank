@@ -37,21 +37,6 @@ SemaphoreHandle_t xRotarySemaphore;
 
 /*****************************   Functions   *******************************/
 
-void init_rotary() {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
-        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
-    }
-
-    // Enable the GPIO pins for digital function (PA5 - PA7)
-    GPIO_PORTA_DEN_R |= 0xE0;
-
-    init_rotary_interrupt();
-}
-
 void init_rotary_interrupt() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -84,6 +69,21 @@ void init_rotary_interrupt() {
     NVIC_EN0_R |= (1 << 0);
 }
 
+void init_rotary() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
+    }
+
+    // Enable the GPIO pins for digital function (PA5 - PA7)
+    GPIO_PORTA_DEN_R |= 0xE0;
+
+    init_rotary_interrupt();
+}
+
 void rotary_interrupt_handler() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -91,12 +91,14 @@ void rotary_interrupt_handler() {
 
     // Checks if PA5 and PA6 have the same state
     if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
+        char direction = 'L';
         xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, 'L', (TickType_t)10);
+        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
         xSemaphoreGive(xRotarySemaphore);
     } else {
+        char direction = 'R';
         xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, 'R', (TickType_t)10);
+        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
         xSemaphoreGive(xRotarySemaphore);
     }
 

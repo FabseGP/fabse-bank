@@ -49,8 +49,6 @@ char **keypadArr;
 
 /*****************************   Variables   *******************************/
 
-SemaphoreHandle_t xBankStateSemaphore;
-
 /*****************************   Functions   *******************************/
 
 char **createArray(int m, int n) { // m = rows, n = columns
@@ -105,7 +103,6 @@ void fillKeypadArr(char **arr) {
 }
 
 void init_keypad_and_arr() {
-
     if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
     }
@@ -126,102 +123,9 @@ void init_keypad_and_arr() {
     GPIO_PORTA_DIR_R |= 0X1C;
 
     // Make an array for the keypad
-    keypadArr = createArray(rows, cols); // The size of the Keypad 4 rows and 3
-    fillKeypadArr(&keypadArr);
-}
-
-void translate(int col, int row) {
-    char result;
-
-    switch (col) {
-        case colX1: {
-            switch (row) {
-                case rowY1:
-                    result = '1';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY2:
-                    result = '4';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY3:
-                    result = '7';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY4:
-                    result = '*';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-            }
-            break;
-        }
-        case colX2: {
-            switch (row) {
-                case rowY1:
-                    result = '2';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY2:
-                    result = '5';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY3:
-                    result = '8';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-                case rowY4:
-                    result = '0';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-            }
-            break;
-        }
-        case colX3: {
-            switch (row) {
-                case rowY1:
-                    result = '3';
-                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                    xQueueSend(xLCDQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xLCDSemaphore);
-                    break;
-                case rowY2:
-                    result = '6';
-                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                    xQueueSend(xLCDQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xLCDSemaphore);
-                    break;
-                case rowY3:
-                    result = '9';
-                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                    xQueueSend(xLCDQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xLCDSemaphore);
-                    break;
-                case rowY4:
-                    result = '#';
-                    xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                    xQueueSend(xKeypadQueue, &result, (TickType_t)10);
-                    xSemaphoreGive(xKeypadSemaphore);
-                    break;
-            }
-            break;
-        }
-    }
+    keypadArr =
+        createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
+    fillKeypadArr(keypadArr);
 }
 
 void keypad_press() {
@@ -244,54 +148,40 @@ void keypad_press() {
         switch (colCheckVal) {
             case colX1: {
                 for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & ~(rowCheckVal)) {
-                        while (1) {
-                            char result = '9';
-                            xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                            xQueueSend(xLCDQueue, &result, (TickType_t)10);
-                            xSemaphoreGive(xLCDSemaphore);
-                        }
-
-                        /*
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
                         xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                         keypadPressVal = keypadArr[j][i];
                         xQueueSend(xKeypadQueue, &keypadPressVal,
                                    (TickType_t)10);
-                        xSemaphoreGive(xKeypadSemaphore); */
-                        translate(i, j);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
-                    rowCheckVal <<= 1;
                 }
                 break;
             }
             case colX2: {
                 for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) { /*
-                          xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                          keypadPressVal = keypadArr[j][i];
-                          xQueueSend(xKeypadQueue, &keypadPressVal,
-                                     (TickType_t)10);
-                          xSemaphoreGive(xKeypadSemaphore); */
-                        translate(i, j);
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
+                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
+                        keypadPressVal = keypadArr[j][i];
+                        xQueueSend(xKeypadQueue, &keypadPressVal,
+                                   (TickType_t)10);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
-                    rowCheckVal <<= 1;
                 }
                 break;
             }
             case colX3: {
                 for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) { /*
-                          xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                          keypadPressVal = keypadArr[j][i];
-                          xQueueSend(xKeypadQueue, &keypadPressVal,
-                                     (TickType_t)10);
-                          xSemaphoreGive(xKeypadSemaphore); */
-                        translate(i, j);
+                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
+                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
+                        keypadPressVal = keypadArr[j][i];
+                        xQueueSend(xKeypadQueue, &keypadPressVal,
+                                   (TickType_t)10);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
-                    rowCheckVal <<= 1;
                 }
                 break;
             }
@@ -303,8 +193,8 @@ void keypad_press() {
 }
 
 void keypad_task(void *pvParameters) {
-    init_keypad_and_arr();
 
+    init_keypad_and_arr();
     while (1) {
         keypad_press();
     }

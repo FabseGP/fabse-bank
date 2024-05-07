@@ -50,18 +50,16 @@ extern SemaphoreHandle_t xSW1Semaphore;
 extern QueueHandle_t     xSW2Queue;
 extern SemaphoreHandle_t xSW2Semaphore;
 
-extern SemaphoreHandle_t xBankStateSemaphore;
-
 // 0 = use systick for delay
 // 1 = use timer1a for delay (can still use systick)
-enum Delay { Timer1a_on = 1 };
+enum Delay { Timer1a_on = 0 };
 
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/
 
-extern uint16_t money, withdraw_amount;
-extern int      readyCheck; // Password control, withdraw control, money check
+extern uint8_t  withdraw_type;
+extern uint16_t money, password, withdraw_amount;
 
 enum BankState {
     Welcome,

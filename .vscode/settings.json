@@ -11,7 +11,8 @@
         "rotary.h": "c",
         "leds.h": "c",
         "global_def.h": "c",
-        "locale": "c"
+        "locale": "c",
+        "timer1a.h": "c"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format"

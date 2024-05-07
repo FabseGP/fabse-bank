@@ -21,6 +21,7 @@
 #include "queue.h"
 #include "rotary.h"
 #include "semphr.h"
+#include "string.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
 
@@ -30,25 +31,25 @@
 
 /*****************************   Variables   *******************************/
 
-uint16_t withdraw_amount = 500;
+uint8_t  withdraw_type;
+uint16_t money, password, withdraw_amount;
 
 /*****************************   Functions   *******************************/
 
 void welcome() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
     // "/" = new line, ">" = 2s delay + new screen
-    char fabse_text[] = "Welcome to /Fabses bank >Come closer /Money awaits";
+    char i, fabse_text[] = ">Welcome to /Fabses bank>Come closer /Money awaits";
 
-    // somehow using "char i = 0" in the for loops result in an error, need
-    // to define it outside
-    char i;
-
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
     for (i = 0; i < strlen(fabse_text); i++) {
-        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-        for (i = 0; i < strlen(fabse_text); i++) {
-            xQueueSend(xLCDQueue, &fabse_text[i], (TickType_t)0);
-        }
-        xSemaphoreGive(xLCDSemaphore);
+        xQueueSend(xLCDQueue, &fabse_text[i], (TickType_t)10);
     }
+    xSemaphoreGive(xLCDSemaphore);
+
     vTaskDelay(5000 / portTICK_RATE_MS);
 }
 
@@ -57,36 +58,33 @@ void balance() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint16_t balance = 50000;
-    uint8_t  exit = 1, index = 0;
-    char     amount[4] = {};
-
-    char     i;
-    char     money_text[] = ">Please enter /balance: ";
+    money           = 50000;
+    uint8_t running = 1, index = 0;
+    char    i, amount[4] = {}, money_text[] = ">Please enter /balance: ";
 
     xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
     for (i = 0; i < strlen(money_text); i++) {
-        xQueueSend(xLCDQueue, &money_text[i], (TickType_t)0);
+        xQueueSend(xLCDQueue, &money_text[i], (TickType_t)10);
     }
     xSemaphoreGive(xLCDSemaphore);
 
-    while (exit) {
+    while (running) {
         if (index == 3) {
-            balance =
+            money =
                 amount[0] * 1000 + amount[1] * 100 + amount[2] * 10 + amount[3];
-            if (balance >= 0 && balance <= 9999) {
+            if (money <= 9999) {
                 char congratulations[] = ">You succeeded!";
                 xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                 for (i = 0; i < strlen(congratulations); i++) {
-                    xQueueSend(xLCDQueue, &congratulations[i], (TickType_t)0);
+                    xQueueSend(xLCDQueue, &congratulations[i], (TickType_t)10);
                 }
                 xSemaphoreGive(xLCDSemaphore);
-                exit = 0;
+                running = 0;
             } else {
                 char baka_text[] = ">Why you dumb...? /Try again!";
                 xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                 for (i = 0; i < strlen(baka_text); i++) {
-                    xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)0);
+                    xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)10);
                 }
                 xSemaphoreGive(xLCDSemaphore);
             }
@@ -94,7 +92,53 @@ void balance() {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
                 pdPASS) {
                 xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                xQueueSend(xLCDQueue, &amount[index], (TickType_t)0);
+                xQueueSend(xLCDQueue, &amount[index], (TickType_t)10);
+                xSemaphoreGive(xLCDSemaphore);
+                index++;
+            }
+        }
+    }
+}
+
+void security_code() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    uint8_t running = 1, index = 0;
+    char    i, security[4] = {}, security_text[] = ">Please enter /password: ";
+
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    for (i = 0; i < strlen(security_text); i++) {
+        xQueueSend(xLCDQueue, &security_text[i], (TickType_t)10);
+    }
+    xSemaphoreGive(xLCDSemaphore);
+
+    while (running) {
+        if (index == 3) {
+            password = security[0] * 1000 + security[1] * 100 +
+                       security[2] * 10 + security[3];
+            if (password % 8 == 0) {
+                char congratulations[] = ">You succeeded!";
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                for (i = 0; i < strlen(congratulations); i++) {
+                    xQueueSend(xLCDQueue, &congratulations[i], (TickType_t)10);
+                }
+                xSemaphoreGive(xLCDSemaphore);
+                running = 0;
+            } else {
+                char baka_text[] = ">Why you dumb...? /Try again!";
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                for (i = 0; i < strlen(baka_text); i++) {
+                    xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)10);
+                }
+                xSemaphoreGive(xLCDSemaphore);
+            }
+        } else {
+            if (xQueueReceive(xKeypadQueue, &security[index], (TickType_t)10) ==
+                pdPASS) {
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                xQueueSend(xLCDQueue, &security[index], (TickType_t)10);
                 xSemaphoreGive(xLCDSemaphore);
                 index++;
             }
@@ -103,23 +147,74 @@ void balance() {
 }
 
 void withdraw() {
-    uint8_t exit = 1, state = 0, print_lcd = 1;
+    uint8_t running = 1, state = 0, print_lcd = 1;
 
-    // hvis vi først incrementer last case i slutningen af hver case men
-    // current case i starten burde det virke?
-    char fabse_amount[] = ">Withdraw amount: /";
-    char i;
-    for (i = 0; i < strlen(fabse_amount); i++) {
-        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-        for (i = 0; i < strlen(fabse_amount); i++) {
-            xQueueSend(xLCDQueue, &fabse_amount[i], (TickType_t)0);
-        }
-        xSemaphoreGive(xLCDSemaphore);
+    char    i, withdraw[] = ">Withdraw amount: /";
+
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    for (i = 0; i < strlen(withdraw); i++) {
+        xQueueSend(xLCDQueue, &withdraw[i], (TickType_t)10);
     }
+    xSemaphoreGive(xLCDSemaphore);
 
-    while (exit) {
+    withdraw_amount = 500;
 
-        uint8_t button_press = 0, double_press;
+    while (running) {
+
+        uint8_t button_press, double_press;
+
+        switch (state) {
+            case 0:
+                if (print_lcd == 1) {
+                    char amount[] = "/500";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(amount); i++) {
+                        xQueueSend(xLCDQueue, &amount[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_amount = 500;
+                break;
+            case 1:
+                if (print_lcd == 1) {
+                    char amount[] = "/200";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(amount); i++) {
+                        xQueueSend(xLCDQueue, &amount[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_amount = 200;
+                break;
+            case 2:
+                if (print_lcd == 1) {
+                    char amount[] = "/100";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(amount); i++) {
+                        xQueueSend(xLCDQueue, &amount[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_amount = 100;
+                break;
+            case 3:
+                if (print_lcd == 1) {
+                    char amount[] = "/50 ";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(amount); i++) {
+                        xQueueSend(xLCDQueue, &amount[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_amount = 50;
+                break;
+            default:
+                break;
+        }
 
         if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
             xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
@@ -137,100 +232,139 @@ void withdraw() {
                 pdPASS) {
                 xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
                 char congratulations[] = ">You succeeded!";
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                 for (i = 0; i < strlen(congratulations); i++) {
+                    xQueueSend(xLCDQueue, &congratulations[i], (TickType_t)10);
+                }
+                xSemaphoreGive(xSW2Semaphore);
+                xSemaphoreGive(xLCDSemaphore);
+                running = 0;
+            }
+        }
+    }
+}
+
+void coinage() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    uint8_t running = 1, state = 0, print_lcd = 1;
+
+    char    i, coinage[] = ">Withdraw type: /";
+
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    for (i = 0; i < strlen(coinage); i++) {
+        xQueueSend(xLCDQueue, &coinage[i], (TickType_t)10);
+    }
+    xSemaphoreGive(xLCDSemaphore);
+
+    withdraw_type = 100;
+
+    while (running) {
+
+        uint8_t rotary_event;
+
+        switch (state) {
+            case 0:
+                if (print_lcd == 1) {
+                    char type[] = "/100 kr";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(type); i++) {
+                        xQueueSend(xLCDQueue, &type[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_type = 100;
+                break;
+            case 1:
+                if (print_lcd == 1) {
+                    char type[] = "/50 kr ";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(type); i++) {
+                        xQueueSend(xLCDQueue, &type[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_type = 50;
+                break;
+            case 2:
+                if (print_lcd == 1) {
+                    char type[] = "/10 kr ";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(type); i++) {
+                        xQueueSend(xLCDQueue, &type[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
+                    print_lcd = 0;
+                }
+                withdraw_type = 10;
+                break;
+            default:
+                break;
+        }
+
+        if (xQueueReceive(xRotaryQueue, &rotary_event, (TickType_t)10) ==
+            pdPASS) {
+            xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+
+            if (rotary_event != 'P') {
+                if (rotary_event == 'R') {
+                    if (state < 2) {
+                        state++;
+                    } else if (state == 2) {
+                        state = 0;
+                    }
+                } else if (rotary_event == 'L') {
+                    if (state < 2) {
+                        state++;
+                    } else if (state == 2) {
+                        state = 0;
+                    }
+                }
+                print_lcd = 1;
+            } else {
+                if (money % withdraw_type == 0) {
+                    char congratulations[] = ">You succeeded!";
                     xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                     for (i = 0; i < strlen(congratulations); i++) {
                         xQueueSend(xLCDQueue, &congratulations[i],
-                                   (TickType_t)0);
+                                   (TickType_t)10);
                     }
-                    xSemaphoreGive(xSW2Semaphore);
+                    xSemaphoreGive(xLCDSemaphore);
+                    running = 0;
+                } else {
+                    char baka_text[] = ">Why you dumb...? /Try again!";
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(baka_text); i++) {
+                        xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)10);
+                    }
+                    xSemaphoreGive(xLCDSemaphore);
                 }
-                exit = 0;
             }
-        }
-
-        if (exit != 0) {
-            switch (state) {
-                case 0:
-                    if (print_lcd == 1) {
-                        char amount[] = "/500";
-                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                        for (i = 0; i < strlen(amount); i++) {
-                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
-                        }
-                        xSemaphoreGive(xLCDSemaphore);
-                        print_lcd = 0;
-                    }
-                    withdraw_amount = 500;
-                    break;
-                case 1:
-                    if (print_lcd == 1) {
-                        char amount[] = "/200";
-                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                        for (i = 0; i < strlen(amount); i++) {
-                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
-                        }
-                        xSemaphoreGive(xLCDSemaphore);
-                        print_lcd = 0;
-                    }
-                    withdraw_amount = 200;
-                    break;
-                case 2:
-                    if (print_lcd == 1) {
-                        char amount[] = "/100";
-                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                        for (i = 0; i < strlen(amount); i++) {
-                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
-                        }
-                        xSemaphoreGive(xLCDSemaphore);
-                        print_lcd = 0;
-                    }
-                    withdraw_amount = 100;
-                    break;
-                case 3:
-                    if (print_lcd == 1) {
-                        char amount[] = "/50 ";
-                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                        for (i = 0; i < strlen(amount); i++) {
-                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
-                        }
-                        xSemaphoreGive(xLCDSemaphore);
-                        print_lcd = 0;
-                    }
-                    withdraw_amount = 50;
-                    break;
-            }
+            xSemaphoreGive(xRotarySemaphore);
         }
     }
 }
 
-void password() {
-    int  i;
-    int  sum       = 0;
-    int  eksponent = 1;
-    char passwordChar;
-    int  passwordInt;
-    char passwordArr[4] = {};
-    for (i = 0; i < 4; i++) {
-        passwordChar = passwordArr[i];
-        if (passwordChar == '*' || passwordChar == '#') {
-            return 0;
-        }
-        passwordInt = passwordChar - '0'; // Find int value of the char
-        passwordInt = passwordInt * eksponent;
-        sum += passwordInt;
-        eksponent = eksponent * 10;
+void print_money() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    // "/" = new line, ">" = 2s delay + new screen
+    char i, print_text[] = ">Stay calm /Printing money";
+
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    for (i = 0; i < strlen(print_text); i++) {
+        xQueueSend(xLCDQueue, &print_text[i], (TickType_t)10);
     }
-    if (sum <= 9999) {
-        return sum;
-    } else {
-        return -1;
-    }
+    xSemaphoreGive(xLCDSemaphore);
+
+    vTaskDelay(5000 / portTICK_RATE_MS);
 }
-
-void coinage() {}
-
-void print_money() {}
 
 void flow_task(void *pvParameters) {
     /*****************************************************************************
@@ -248,7 +382,7 @@ void flow_task(void *pvParameters) {
                 BankState = Password;
                 break;
             case Password:
-                password();
+                security_code();
                 BankState = Withdraw;
                 break;
             case Withdraw:
@@ -257,11 +391,11 @@ void flow_task(void *pvParameters) {
                 break;
             case Coinage:
                 coinage();
-                BankState = Coinage;
+                BankState = Print_money;
                 break;
             case Print_money:
                 print_money();
-                BankState = Print_money;
+                BankState = Welcome;
                 break;
             default:
                 break;
@@ -269,4 +403,4 @@ void flow_task(void *pvParameters) {
     }
 }
 
-/****************************** End Of Module * *******************************/
+/****************************** End Of Module ********************************/
