@@ -17,13 +17,11 @@
 
 /***************************** Include files *******************************/
 
-#include "rotary.h"
 #include "FreeRTOS.h"
 #include "global_def.h"
 #include "queue.h"
 #include "semphr.h"
 #include "tm4c123gh6pm.h"
-#include "uart.h"
 #include <stdint.h>
 
 /*****************************    Defines    *******************************/

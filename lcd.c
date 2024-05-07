@@ -18,10 +18,9 @@
 /***************************** Include files *******************************/
 
 #include "FreeRTOS.h"
+#include "global_def.h"
 #include "queue.h"
-#include "rotary.h"
 #include "semphr.h"
-#include "switches.h"
 #include "task.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>

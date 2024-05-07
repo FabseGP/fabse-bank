@@ -22,7 +22,6 @@
 #include "global_def.h"
 #include "queue.h"
 #include "semphr.h"
-#include "task.h"
 #include "tm4c123gh6pm.h"
 
 /*****************************    Defines    *******************************/

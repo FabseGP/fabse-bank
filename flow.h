@@ -3,23 +3,23 @@
  * Embedded Programming (EMP)
  * Fabian Petrus
  *
- * MODULENAME.: money.h
+ * MODULENAME.: flow.h
  *
  * PROJECT....: fabse_bank
  *
- * DESCRIPTION: Asking the customer (politely) about their financial situation
+ * DESCRIPTION: Flow of operations
  *
  * Change Log.:
  ******************************************************************************
  * Date    Id    Change
  * DDMMYY
  * --------------------
- * 060624  MoH    Module created
+ * 070524  MoH    Module created
  *
  *****************************************************************************/
 
-#ifndef _MONEY_H
-#define _MONEY_H
+#ifndef _FLOW_H_
+#define _FLOW_H_
 
 /***************************** Include files *******************************/
 
@@ -31,11 +31,11 @@
 
 /*****************************   Functions   *******************************/
 
-void money_task(void *pvParameter);
+void flow_task(void *pvParameters);
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Bankrupt the customer
+ *   Function : Flow task
  ******************************************************************************/
 
 /****************************** End Of Module *******************************/
