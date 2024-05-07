@@ -87,10 +87,10 @@ void balance() {
         } else {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
                 pdPASS) {
-                index++;
                 xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
                 xQueueSend(xLCDQueue, &amount[index], (TickType_t)0);
                 xSemaphoreGive(xLCDSemaphore);
+                index++;
             }
         }
     }
@@ -198,6 +198,30 @@ void withdraw() {
     }
 }
 
+void password() {
+    /*
+    int  i;
+    int  sum       = 0;
+    int  eksponent = 1;
+    char passwordChar;
+    int  passwordInt;
+    for (i = 0; i < 4; i++) {
+        passwordChar = passwordArr[i];
+        if (passwordChar == '*' || passwordChar == '#') {
+            return 0;
+        }
+        passwordInt = passwordChar - '0'; // Find int value of the char
+        passwordInt = passwordInt * eksponent;
+        sum += passwordInt;
+        eksponent = eksponent * 10;
+    }
+    if (sum <= 9999) {
+        return sum;
+    } else {
+        return -1;
+    } */
+}
+
 void coinage() {}
 
 void print_money() {}
@@ -218,6 +242,7 @@ void flow_task(void *pvParameters) {
                 BankState = Password;
                 break;
             case Password:
+                password();
                 BankState = Withdraw;
                 break;
             case Withdraw:
@@ -230,7 +255,7 @@ void flow_task(void *pvParameters) {
                 break;
             case Print_money:
                 print_money();
-                BankState = Print_money;
+                BankState = Welcome;
                 break;
             default:
                 break;
