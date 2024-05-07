@@ -58,25 +58,40 @@ void balance() {
      *****************************************************************************/
 
     uint16_t balance = 50000;
-    uint8_t  exit    = 1;
+    uint8_t  exit = 1, index = 0;
+    char     amount[4] = {};
+
+    char     i;
+    char     money_text[] = ">Please enter /balance: ";
+
     while (exit) {
-        char i;
-        char money_text[] = ">Please enter /balance: ";
-        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-        for (i = 0; i < strlen(money_text); i++) {
-            xQueueSend(xLCDQueue, &money_text[i], (TickType_t)0);
-        }
-        xSemaphoreGive(xLCDSemaphore);
-        vTaskDelay(4000 / portTICK_RATE_MS);
-        if (balance > 0 && balance < 9999) {
-            exit = 0;
-        } else {
-            char baka_text[] = ">Why you dumb...? /Try again!";
-            xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-            for (i = 0; i < strlen(baka_text); i++) {
-                xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)0);
+        if (index == 3) {
+            balance =
+                amount[0] * 1000 + amount[1] * 100 + amount[2] * 10 + amount[3];
+            if (balance >= 0 && balance <= 9999) {
+                char congratulations[] = ">You succeeded!";
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                for (i = 0; i < strlen(congratulations); i++) {
+                    xQueueSend(xLCDQueue, &congratulations[i], (TickType_t)0);
+                }
+                xSemaphoreGive(xLCDSemaphore);
+                exit = 0;
+            } else {
+                char baka_text[] = ">Why you dumb...? /Try again!";
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                for (i = 0; i < strlen(baka_text); i++) {
+                    xQueueSend(xLCDQueue, &baka_text[i], (TickType_t)0);
+                }
+                xSemaphoreGive(xLCDSemaphore);
             }
-            xSemaphoreGive(xLCDSemaphore);
+        } else {
+            if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
+                pdPASS) {
+                index++;
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                xQueueSend(xLCDQueue, &amount[index], (TickType_t)0);
+                xSemaphoreGive(xLCDSemaphore);
+            }
         }
     }
 }
