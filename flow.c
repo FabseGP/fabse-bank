@@ -64,6 +64,12 @@ void balance() {
     char     i;
     char     money_text[] = ">Please enter /balance: ";
 
+    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    for (i = 0; i < strlen(money_text); i++) {
+        xQueueSend(xLCDQueue, &money_text[i], (TickType_t)0);
+    }
+    xSemaphoreGive(xLCDSemaphore);
+
     while (exit) {
         if (index == 3) {
             balance =
