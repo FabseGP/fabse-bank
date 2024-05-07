@@ -19,11 +19,11 @@
 
 #include "FreeRTOS.h"
 #include "adc.h"
+#include "flow.h"
 #include "global_def.h"
 #include "keypad.h"
 #include "lcd.h"
 #include "leds.h"
-#include "money.h"
 #include "queue.h"
 #include "rotary.h"
 #include "semphr.h"
@@ -107,7 +107,7 @@ int main() {
                 Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(money_task, "money_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+    xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
     // xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
     // NULL);
