@@ -95,6 +95,7 @@ int main() {
     }
 
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    xTaskCreate(led_task, "LED", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);

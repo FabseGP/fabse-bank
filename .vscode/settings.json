@@ -12,7 +12,20 @@
         "leds.h": "c",
         "global_def.h": "c",
         "locale": "c",
-        "timer1a.h": "c"
+        "timer1a.h": "c",
+        "any": "c",
+        "array": "c",
+        "charconv": "c",
+        "complex": "c",
+        "functional": "c",
+        "ratio": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "variant": "c",
+        "__hash_table": "c",
+        "__tree": "c",
+        "limits": "c"
     },
     "editor.formatOnSave": true,
     "editor.defaultFormatter": "xaver.clang-format"

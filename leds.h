@@ -38,32 +38,11 @@ void init_leds();
  *   Function : Initialize RGB-LEDs
  ******************************************************************************/
 
-void red_led_task(void *pvParameters);
+void led_task(void *pvParameters);
 /*****************************************************************************
  *   Input    : -
  *   Output   : -
- *   Function : Task for red LED
- ******************************************************************************/
-
-void yellow_led_task(void *pvParameters);
-/*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Task for yellow LED
- ******************************************************************************/
-
-void green_led_task(void *pvParameters);
-/*****************************************************************************
- *   Input    : -
- *   Output   : -
- *   Function : Task for green LED
- ******************************************************************************/
-
-void status_led_task(void *pvParameters);
-/*****************************************************************************
- *   Input    : Delay time for blinking
- *   Output   : -
- *   Function : Blinking the status LED for a defined time period
+ *   Function : Task for LEDs
  ******************************************************************************/
 
 /****************************** End Of Module *******************************/
