@@ -41,7 +41,7 @@ enum Stack_size { USERTASK_STACK_SIZE = configMINIMAL_STACK_SIZE };
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
-BankState = Withdraw;
+BankState = Money;
 
 /*****************************   Constants   *******************************/
 
@@ -109,8 +109,7 @@ int main() {
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
-    // xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
-    // NULL);
+    xTaskCreate(keypad_task, "Keypad", 2048, NULL, Low_prio, NULL);
 
     vTaskStartScheduler();
 
