@@ -97,13 +97,11 @@ int main() {
         init_timer1a(250);
     }
 
-    // xTaskCreate(led_task, "led_task", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //             NULL);
-    xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    // xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
-    // NULL); xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL,
-    // Low_prio,
-    //             NULL);
+    xTaskCreate(led_task, "led_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+                NULL);
+    xTaskCreate(lcd_task, "LCD", 2048, NULL, Low_prio, NULL);
+    // xTaskCreate(uart0_task, "UART", 2048, NULL, Low_prio, NULL);
+    xTaskCreate(flow_task, "flow_task", 2048, NULL, Low_prio, NULL);
     xTaskCreate(keypad_task, "Keypad", 1024, NULL, Low_prio, NULL);
 
     vTaskStartScheduler();
