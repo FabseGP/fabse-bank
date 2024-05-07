@@ -198,13 +198,13 @@ void keypad_press() {
 
 void keypad_task(void *pvParameters) {
     init_keypad_and_arr();
-    while (1) {
-        char a = 'a';
+    // while (1) {
+    //     char a = 'a';
 
-        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-        xQueueSend(xLCDQueue, &a, (TickType_t)0);
-        xSemaphoreGive(xLCDSemaphore);
-    }
+    //     xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+    //     xQueueSend(xLCDQueue, &a, (TickType_t)0);
+    //     xSemaphoreGive(xLCDSemaphore);
+    // }
     while (1) {
         keypad_press();
     }
