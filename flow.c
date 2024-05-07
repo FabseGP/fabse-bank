@@ -63,11 +63,6 @@ void balance() {
 
     char     i;
     char     money_text[] = ">Please enter /balance: ";
-    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-    for (i = 0; i < strlen(money_text); i++) {
-        xQueueSend(xLCDQueue, &money_text[i], (TickType_t)0);
-    }
-    xSemaphoreGive(xLCDSemaphore);
 
     while (exit) {
         if (index == 3) {
@@ -92,10 +87,10 @@ void balance() {
         } else {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
                 pdPASS) {
-                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                xQueueSend(xLCDQueue, &amount[index], (TickType_t)10);
-                xSemaphoreGive(xLCDSemaphore);
                 index++;
+                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                xQueueSend(xLCDQueue, &amount[index], (TickType_t)0);
+                xSemaphoreGive(xLCDSemaphore);
             }
         }
     }
@@ -203,30 +198,6 @@ void withdraw() {
     }
 }
 
-void password() {
-    /*
-    int  i;
-    int  sum       = 0;
-    int  eksponent = 1;
-    char passwordChar;
-    int  passwordInt;
-    for (i = 0; i < 4; i++) {
-        passwordChar = passwordArr[i];
-        if (passwordChar == '*' || passwordChar == '#') {
-            return 0;
-        }
-        passwordInt = passwordChar - '0'; // Find int value of the char
-        passwordInt = passwordInt * eksponent;
-        sum += passwordInt;
-        eksponent = eksponent * 10;
-    }
-    if (sum <= 9999) {
-        return sum;
-    } else {
-        return -1;
-    } */
-}
-
 void coinage() {}
 
 void print_money() {}
@@ -247,7 +218,6 @@ void flow_task(void *pvParameters) {
                 BankState = Password;
                 break;
             case Password:
-                password();
                 BankState = Withdraw;
                 break;
             case Withdraw:
@@ -260,7 +230,7 @@ void flow_task(void *pvParameters) {
                 break;
             case Print_money:
                 print_money();
-                BankState = Welcome;
+                BankState = Print_money;
                 break;
             default:
                 break;
@@ -268,5 +238,4 @@ void flow_task(void *pvParameters) {
     }
 }
 
-/****************************** End Of Module
- * *******************************/
+/****************************** End Of Module * *******************************/
