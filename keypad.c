@@ -127,11 +127,10 @@ void init_keypad_and_arr() {
 
     // PORT A as outputs
     GPIO_PORTA_DIR_R |= 0X1C;
-
     // Make an array for the keypad
     keypadArr =
         createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
-    fillKeypadArr(keypadArr);
+    fillKeypadArr(&keypadArr);
 }
 
 void keypad_press() {
@@ -141,7 +140,6 @@ void keypad_press() {
               // bitshifted to correspond with the next
     char keypadPressVal;
     int  i = 0;
-
     for (i = 0; i < cols; i++) {
 
         uint8_t rowCheckVal =
@@ -199,8 +197,14 @@ void keypad_press() {
 }
 
 void keypad_task(void *pvParameters) {
-
     init_keypad_and_arr();
+    while (1) {
+        char a = 'a';
+
+        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+        xQueueSend(xLCDQueue, &a, (TickType_t)0);
+        xSemaphoreGive(xLCDSemaphore);
+    }
     while (1) {
         keypad_press();
     }
