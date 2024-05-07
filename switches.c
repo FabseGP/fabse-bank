@@ -25,11 +25,11 @@
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer {
-    Debounce_time   = 40,
+    Debounce_time   = 100,
     Clear_interrupt = 0x11,
     Clear           = 0,
-    SW1             = 0x10,
-    SW2             = 0x01
+    SW1             = 0x01,
+    SW2             = 0x10
 };
 
 QueueHandle_t     xSW1Queue, xSW2Queue;

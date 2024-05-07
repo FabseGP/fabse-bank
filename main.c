@@ -63,13 +63,13 @@ void init_queues_semaphores() {
     xADCQueue           = xQueueCreate(10, sizeof(uint16_t));
     xADCSemaphore       = xSemaphoreCreateBinary();
 
-    xRotaryQueue        = xQueueCreate(5, sizeof(uint8_t));
+    xRotaryQueue        = xQueueCreate(10, sizeof(uint8_t));
     xRotarySemaphore    = xSemaphoreCreateBinary();
 
-    xSW1Queue           = xQueueCreate(5, sizeof(uint8_t));
+    xSW1Queue           = xQueueCreate(10, sizeof(uint8_t));
     xSW1Semaphore       = xSemaphoreCreateBinary();
 
-    xSW2Queue           = xQueueCreate(5, sizeof(uint8_t));
+    xSW2Queue           = xQueueCreate(10, sizeof(uint8_t));
     xSW2Semaphore       = xSemaphoreCreateBinary();
 
     xBankStateSemaphore = xSemaphoreCreateBinary();

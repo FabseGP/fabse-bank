@@ -30,6 +30,8 @@
 
 /*****************************   Variables   *******************************/
 
+uint16_t withdraw_amount = 500;
+
 /*****************************   Functions   *******************************/
 
 void welcome() {
@@ -79,6 +81,112 @@ void balance() {
     }
 }
 
+void withdraw() {
+    uint8_t exit = 1, state = 0, print_lcd = 1;
+
+    // hvis vi først incrementer last case i slutningen af hver case men
+    // current case i starten burde det virke?
+    char fabse_amount[] = ">Withdraw amount: /";
+    char i;
+    for (i = 0; i < strlen(fabse_amount); i++) {
+        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+        for (i = 0; i < strlen(fabse_amount); i++) {
+            xQueueSend(xLCDQueue, &fabse_amount[i], (TickType_t)0);
+        }
+        xSemaphoreGive(xLCDSemaphore);
+    }
+
+    while (exit) {
+
+        uint8_t button_press = 0, double_press;
+
+        if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
+            xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
+            state++;
+            if (state > 3) {
+                state = 0;
+            }
+            print_lcd = 1;
+            xSemaphoreGive(xSW1Semaphore);
+        }
+
+        if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) == pdPASS) {
+            vTaskDelay(200 / portTICK_RATE_MS);
+            if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
+                pdPASS) {
+                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
+                char congratulations[] = ">You succeeded!";
+                for (i = 0; i < strlen(congratulations); i++) {
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    for (i = 0; i < strlen(congratulations); i++) {
+                        xQueueSend(xLCDQueue, &congratulations[i],
+                                   (TickType_t)0);
+                    }
+                    xSemaphoreGive(xSW2Semaphore);
+                }
+                exit = 0;
+            }
+        }
+
+        if (exit != 0) {
+            switch (state) {
+                case 0:
+                    if (print_lcd == 1) {
+                        char amount[] = "/500";
+                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                        for (i = 0; i < strlen(amount); i++) {
+                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
+                        }
+                        xSemaphoreGive(xLCDSemaphore);
+                        print_lcd = 0;
+                    }
+                    withdraw_amount = 500;
+                    break;
+                case 1:
+                    if (print_lcd == 1) {
+                        char amount[] = "/200";
+                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                        for (i = 0; i < strlen(amount); i++) {
+                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
+                        }
+                        xSemaphoreGive(xLCDSemaphore);
+                        print_lcd = 0;
+                    }
+                    withdraw_amount = 200;
+                    break;
+                case 2:
+                    if (print_lcd == 1) {
+                        char amount[] = "/100";
+                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                        for (i = 0; i < strlen(amount); i++) {
+                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
+                        }
+                        xSemaphoreGive(xLCDSemaphore);
+                        print_lcd = 0;
+                    }
+                    withdraw_amount = 100;
+                    break;
+                case 3:
+                    if (print_lcd == 1) {
+                        char amount[] = "/50 ";
+                        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                        for (i = 0; i < strlen(amount); i++) {
+                            xQueueSend(xLCDQueue, &amount[i], (TickType_t)0);
+                        }
+                        xSemaphoreGive(xLCDSemaphore);
+                        print_lcd = 0;
+                    }
+                    withdraw_amount = 50;
+                    break;
+            }
+        }
+    }
+}
+
+void coinage() {}
+
+void print_money() {}
+
 void flow_task(void *pvParameters) {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -98,6 +206,16 @@ void flow_task(void *pvParameters) {
                 BankState = Withdraw;
                 break;
             case Withdraw:
+                withdraw();
+                BankState = Coinage;
+                break;
+            case Coinage:
+                coinage();
+                BankState = Coinage;
+                break;
+            case Print_money:
+                print_money();
+                BankState = Print_money;
                 break;
             default:
                 break;
@@ -105,4 +223,5 @@ void flow_task(void *pvParameters) {
     }
 }
 
-/****************************** End Of Module *******************************/
+/****************************** End Of Module
+ * *******************************/

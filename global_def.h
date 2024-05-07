@@ -60,14 +60,16 @@ enum Delay { Timer1a_on = 1 };
 
 /*****************************   Variables   *******************************/
 
-extern int money;
-extern int readyCheck; // Password control, withdraw control, money check
+extern uint16_t money, withdraw_amount;
+extern int      readyCheck; // Password control, withdraw control, money check
 
 enum BankState {
     Welcome,
     Money,
     Password,
     Withdraw,
+    Coinage,
+    Print_money,
 
     TotalStates
 };
