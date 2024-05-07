@@ -109,8 +109,7 @@ int main() {
     xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
-    // xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
-    // NULL);
+    xTaskCreate(keypad_task, "Keypad", 2048, NULL, Low_prio, NULL);
 
     vTaskStartScheduler();
 

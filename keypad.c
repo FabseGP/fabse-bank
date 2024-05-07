@@ -131,93 +131,7 @@ void init_keypad_and_arr() {
     // Make an array for the keypad
     keypadArr =
         createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
-    fillKeypadArr(keypadArr);
-}
-
-int moneyCheck(char moneyArr[]) {
-    int  i;
-    int  sum       = 0;
-    int  eksponent = 1;
-    char moneyChar;
-    int  moneyInt;
-    for (i = 0; i < 4; i++) {
-        moneyChar = moneyArr[i];
-        if (moneyChar == '*' || moneyChar == '#') {
-            return 0;
-        }
-        moneyInt = moneyChar - '0'; // Find int value of the char
-        moneyInt = moneyInt * eksponent;
-        sum += moneyInt;
-        eksponent = eksponent * 10;
-    }
-    if (sum % 8 == 0) {
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-int passwordCheck(char passwordArr[]) {
-    int  i;
-    int  sum       = 0;
-    int  eksponent = 1;
-    char passwordChar;
-    int  passwordInt;
-    for (i = 0; i < 4; i++) {
-        passwordChar = passwordArr[i];
-        if (passwordChar == '*' || passwordChar == '#') {
-            return 0;
-        }
-        passwordInt = passwordChar - '0'; // Find int value of the char
-        passwordInt = passwordInt * eksponent;
-        sum += passwordInt;
-        eksponent = eksponent * 10;
-    }
-    if (sum <= 9999) {
-        return sum;
-    } else {
-        return -1;
-    }
-}
-
-void keypad_state(char keypadPressVal) {
-
-    switch (BankState) {
-        case Welcome: {
-            break;
-        }
-        case Money: {
-            if (moneyCounter < 4) {
-                moneyArr[moneyCounter] = keypadPressVal;
-                moneyCounter++;
-            } else {
-                xSemaphoreTake(xBankStateSemaphore, portMAX_DELAY);
-                if (moneyCheck(moneyArr) != 0) {
-                    BankState = Password;
-                }
-                moneyCounter = 0;
-                // Here we can add a int money Queue to put the sum of the money
-                // if it is important
-                xSemaphoreGive(xBankStateSemaphore);
-            }
-        }
-        case Password: {
-            if (passwordCounter < 4) {
-                passwordArr[passwordCounter] = keypadPressVal;
-                passwordCounter++;
-            } else {
-                xSemaphoreTake(xBankStateSemaphore, portMAX_DELAY);
-                if (passwordCheck(passwordArr)) {
-                    BankState = Withdraw;
-                }
-                passwordCounter = 0;
-                xSemaphoreGive(xBankStateSemaphore);
-            }
-            break;
-        }
-        default:
-            break;
-    }
+    fillKeypadArr(&keypadArr);
 }
 
 void keypad_press() {
@@ -241,11 +155,11 @@ void keypad_press() {
             case colX1: {
                 for (j = 0; j < rows; j++) {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                         keypadPressVal = keypadArr[j][i];
-                        keypad_state(keypadPressVal);
-                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
-                        xSemaphoreGive(xLCDSemaphore);
+                        xQueueSend(xKeypadQueue, &keypadPressVal,
+                                   (TickType_t)10);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
                 }
@@ -254,11 +168,11 @@ void keypad_press() {
             case colX2: {
                 for (j = 0; j < rows; j++) {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                         keypadPressVal = keypadArr[j][i];
-                        keypad_state(keypadPressVal);
-                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
-                        xSemaphoreGive(xLCDSemaphore);
+                        xQueueSend(xKeypadQueue, &keypadPressVal,
+                                   (TickType_t)10);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
                 }
@@ -267,11 +181,11 @@ void keypad_press() {
             case colX3: {
                 for (j = 0; j < rows; j++) {
                     if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xLCDSemaphore, portMAX_DELAY);
+                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                         keypadPressVal = keypadArr[j][i];
-                        keypad_state(keypadPressVal);
-                        xQueueSend(xLCDQueue, &keypadPressVal, (TickType_t)10);
-                        xSemaphoreGive(xLCDSemaphore);
+                        xQueueSend(xKeypadQueue, &keypadPressVal,
+                                   (TickType_t)10);
+                        xSemaphoreGive(xKeypadSemaphore);
                         break;
                     }
                 }
@@ -287,8 +201,13 @@ void keypad_press() {
 void keypad_task(void *pvParameters) {
 
     init_keypad_and_arr();
+
     while (1) {
-        keypad_press();
+
+        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+        xQueueSend(xLCDQueue, &keypadArr[0][0], (TickType_t)0);
+        xSemaphoreGive(xLCDSemaphore);
+        //  keypad_press();
     }
     destroyArray(keypadArr);
 }
