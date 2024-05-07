@@ -60,7 +60,7 @@ void init_leds() {
     GPIO_PORTF_DATA_R |= Led_off;
 }
 
-void led_task(void *pvParameters) {
+void red_led_task(void *pvParameters) {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
@@ -87,13 +87,37 @@ void led_task(void *pvParameters) {
         portTickType delay = 1000 - adc_value / 5;
         vTaskDelay(delay / portTICK_RATE_MS);
         xSemaphoreGive(xADCSemaphore);
+    }
+}
 
+void yellow_led_task(void *pvParameters) {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    while (1) {
         GPIO_PORTF_DATA_R ^= 0x04;
         vTaskDelay(1000 / portTICK_RATE_MS);
+    }
+}
 
+void green_led_task(void *pvParameters) {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    while (1) {
         GPIO_PORTF_DATA_R ^= 0x08;
         vTaskDelay(1500 / portTICK_RATE_MS);
+    }
+}
 
+void status_led_task(void *pvParameters) {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    while (1) {
         GPIO_PORTD_DATA_R ^= 0x40;
         vTaskDelay(500 / portTICK_RATE_MS);
     }
