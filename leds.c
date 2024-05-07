@@ -60,66 +60,17 @@ void init_leds() {
     GPIO_PORTF_DATA_R |= Led_off;
 }
 
-void red_led_task(void *pvParameters) {
+void led_task(void *pvParameters) {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
+    // Wait 100-1000 ms (200-1000) before blinking the status LED
     while (1) {
-        GPIO_PORTF_DATA_R ^= 0x02;
-
-        /*
-        uint16_t adc_value;
-
-        // Start conversion at sequencer 3
-        ADC0_PSSI_R = 0x08;
-
-        if (xQueueReceive(xADCQueue, &adc_value, (TickType_t)10) == pdPASS) {
-            xSemaphoreTake(xADCSemaphore, (TickType_t)10);
-            // Wait 100-1000 ms (200-1000)
-            portTickType delay = 1000 - adc_value / 5;
-            vTaskDelay(delay / portTICK_RATE_MS);
-            xSemaphoreGive(xADCSemaphore);
-        } */
-
-        uint16_t adc_value = get_adc();
-        // Wait 100-1000 ms (200-1000)
-        portTickType delay = 1000 - adc_value / 5;
+        GPIO_PORTF_DATA_R ^= 0x40;
+        uint16_t     adc_value = get_adc();
+        portTickType delay     = 1000 - adc_value / 5;
         vTaskDelay(delay / portTICK_RATE_MS);
-        xSemaphoreGive(xADCSemaphore);
-    }
-}
-
-void yellow_led_task(void *pvParameters) {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    while (1) {
-        GPIO_PORTF_DATA_R ^= 0x04;
-        vTaskDelay(1000 / portTICK_RATE_MS);
-    }
-}
-
-void green_led_task(void *pvParameters) {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    while (1) {
-        GPIO_PORTF_DATA_R ^= 0x08;
-        vTaskDelay(1500 / portTICK_RATE_MS);
-    }
-}
-
-void status_led_task(void *pvParameters) {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    while (1) {
-        GPIO_PORTD_DATA_R ^= 0x40;
-        vTaskDelay(500 / portTICK_RATE_MS);
     }
 }
 
