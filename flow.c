@@ -32,6 +32,24 @@
 
 /*****************************   Functions   *******************************/
 
+void welcome() {
+    // "/" = new line, ">" = 2s delay + new screen
+    char fabse_text[] = "Welcome to /Fabses bank >Come closer /Money awaits";
+
+    // somehow using "char i = 0" in the for loops result in an error, need
+    // to define it outside
+    char i;
+
+    for (i = 0; i < strlen(fabse_text); i++) {
+        xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+        for (i = 0; i < strlen(fabse_text); i++) {
+            xQueueSend(xLCDQueue, &fabse_text[i], (TickType_t)0);
+        }
+        xSemaphoreGive(xLCDSemaphore);
+    }
+    vTaskDelay(5000 / portTICK_RATE_MS);
+}
+
 void balance() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -69,12 +87,15 @@ void flow_task(void *pvParameters) {
     while (1) {
         switch (BankState) {
             case Welcome:
+                welcome();
+                BankState = Money;
                 break;
             case Money:
                 balance();
-                BankState = Withdraw;
+                BankState = Password;
                 break;
             case Password:
+                BankState = Withdraw;
                 break;
             case Withdraw:
                 break;

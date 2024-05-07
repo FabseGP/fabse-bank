@@ -41,7 +41,7 @@ enum Stack_size { USERTASK_STACK_SIZE = configMINIMAL_STACK_SIZE };
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
-BankState = Money;
+BankState = Welcome;
 
 /*****************************   Constants   *******************************/
 

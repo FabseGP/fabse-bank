@@ -131,25 +131,6 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
-    // "/" = new line, ">" = 2s delay + new screen
-    //  char fabse_text[] = "Welcome to /Fabses bank >Come closer /Money
-    //  awaits";
-
-    // somehow using "char i = 0" in the for loops result in an error, need to
-    // define it outside
-    char i;
-    /*
-        for (i = 0; i < strlen(fabse_text); i++) {
-            if (fabse_text[i] == '/') {
-                lcd_send(Bottom_line, Instruction);
-            } else if (fabse_text[i] == '>') {
-                vTaskDelay(2000 / portTICK_RATE_MS);
-                lcd_send(Clear, Instruction);
-            } else {
-                lcd_send(fabse_text[i], Output);
-            }
-        }
-    */
     while (1) {
         uint8_t data;
         if (xQueueReceive(xLCDQueue, &data, (TickType_t)10) == pdPASS) {
