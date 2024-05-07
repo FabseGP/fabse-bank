@@ -41,28 +41,6 @@ SemaphoreHandle_t xSW1Semaphore, xSW2Semaphore;
 
 /*****************************   Functions   *******************************/
 
-void init_switches() {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOF) {
-        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
-    }
-
-    // Unlock sw2
-    GPIO_PORTF_LOCK_R = 0x4C4F434B;
-    GPIO_PORTF_CR_R   = 0x1F;
-
-    // Enable the GPIO pins for digital function (PF4 & PF0)
-    GPIO_PORTF_DEN_R |= 0x11;
-
-    // Enable internal pull-up (PF4 & PF0).
-    GPIO_PORTF_PUR_R |= 0x11;
-
-    init_switches_interrupt();
-}
-
 void init_switches_interrupt() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
@@ -96,6 +74,28 @@ void init_switches_interrupt() {
     // shifts 00000....1 (32 bits in total) 30 times to the left, setting the
     // 30th bit for enabling PORTF interrupt
     NVIC_EN0_R |= (1 << 30);
+}
+
+void init_switches() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOF) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOF;
+    }
+
+    // Unlock sw2
+    GPIO_PORTF_LOCK_R = 0x4C4F434B;
+    GPIO_PORTF_CR_R   = 0x1F;
+
+    // Enable the GPIO pins for digital function (PF4 & PF0)
+    GPIO_PORTF_DEN_R |= 0x11;
+
+    // Enable internal pull-up (PF4 & PF0).
+    GPIO_PORTF_PUR_R |= 0x11;
+
+    init_switches_interrupt();
 }
 
 void switch_debouncer() {

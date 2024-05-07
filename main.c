@@ -41,7 +41,7 @@ enum Stack_size { USERTASK_STACK_SIZE = configMINIMAL_STACK_SIZE };
 
 enum Priorities { Idle_prio, Low_prio, Med_prio, High_prio };
 
-BankState = Money;
+BankState = Welcome;
 
 /*****************************   Constants   *******************************/
 
@@ -51,28 +51,26 @@ BankState = Money;
 
 void init_queues_semaphores() {
     // Queue with x elements of uint8_t-type + semaphore
-    xLCDQueue           = xQueueCreate(100, sizeof(uint8_t));
-    xLCDSemaphore       = xSemaphoreCreateBinary();
+    xLCDQueue        = xQueueCreate(50, sizeof(uint8_t));
+    xLCDSemaphore    = xSemaphoreCreateBinary();
 
-    xUARTQueue          = xQueueCreate(30, sizeof(uint8_t));
-    xUARTSemaphore      = xSemaphoreCreateBinary();
+    xUARTQueue       = xQueueCreate(30, sizeof(uint8_t));
+    xUARTSemaphore   = xSemaphoreCreateBinary();
 
-    xKeypadQueue        = xQueueCreate(10, sizeof(uint8_t));
-    xKeypadSemaphore    = xSemaphoreCreateBinary();
+    xKeypadQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xKeypadSemaphore = xSemaphoreCreateBinary();
 
-    xADCQueue           = xQueueCreate(10, sizeof(uint16_t));
-    xADCSemaphore       = xSemaphoreCreateBinary();
+    xADCQueue        = xQueueCreate(10, sizeof(uint16_t));
+    xADCSemaphore    = xSemaphoreCreateBinary();
 
-    xRotaryQueue        = xQueueCreate(10, sizeof(uint8_t));
-    xRotarySemaphore    = xSemaphoreCreateBinary();
+    xRotaryQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xRotarySemaphore = xSemaphoreCreateBinary();
 
-    xSW1Queue           = xQueueCreate(10, sizeof(uint8_t));
-    xSW1Semaphore       = xSemaphoreCreateBinary();
+    xSW1Queue        = xQueueCreate(10, sizeof(uint8_t));
+    xSW1Semaphore    = xSemaphoreCreateBinary();
 
-    xSW2Queue           = xQueueCreate(10, sizeof(uint8_t));
-    xSW2Semaphore       = xSemaphoreCreateBinary();
-
-    xBankStateSemaphore = xSemaphoreCreateBinary();
+    xSW2Queue        = xQueueCreate(10, sizeof(uint8_t));
+    xSW2Semaphore    = xSemaphoreCreateBinary();
 
     xSemaphoreGive(xLCDSemaphore);
     xSemaphoreGive(xUARTSemaphore);
@@ -81,7 +79,6 @@ void init_queues_semaphores() {
     xSemaphoreGive(xRotarySemaphore);
     xSemaphoreGive(xSW1Semaphore);
     xSemaphoreGive(xSW2Semaphore);
-    xSemaphoreGive(xBankStateSemaphore);
 }
 
 int main() {
@@ -97,21 +94,12 @@ int main() {
         init_timer1a(250);
     }
 
-    // xTaskCreate(status_led_task, "status_led", USERTASK_STACK_SIZE, NULL,
-    //             Low_prio, NULL);
-    // xTaskCreate(red_led_task, "red_led", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //             NULL);
-    // xTaskCreate(yellow_led_task, "yellow_led", USERTASK_STACK_SIZE, NULL,
-    //             Low_prio, NULL);
-    // xTaskCreate(green_led_task, "green_led", USERTASK_STACK_SIZE, NULL,
-    //             Low_prio, NULL);
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    // xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
-    // NULL);
-    //  xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //            NULL);
-    xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
+    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
+    // xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
+    // NULL);
 
     vTaskStartScheduler();
 
