@@ -197,16 +197,16 @@ void withdraw() {
             if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
                 pdPASS) {
                 xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
-                if (withdraw_amount < money) {
+                if (money < withdraw_amount) {
                     lcd_array_send(baka_text);
                     vTaskDelay(2000 / portTICK_RATE_MS);
                     lcd_array_send(withdraw_text);
                     print_lcd = 1;
                 } else {
                     lcd_array_send(congratulations);
+                    running = 0;
                 }
                 xSemaphoreGive(xSW2Semaphore);
-                running = 0;
             }
         }
     }
