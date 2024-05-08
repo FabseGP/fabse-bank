@@ -27,82 +27,39 @@
 
 /*****************************    Defines    *******************************/
 
-#define rows  4
-#define cols  3
-#define colX1 0x04
-#define colX2 0x08
-#define colX3 0x10
-
-#define rowY1 0x01
-#define rowY2 0x02
-#define rowY3 0x04
-#define rowY4 0x08
-
-#define CLEAR 0x00
-
 QueueHandle_t     xKeypadQueue;
 SemaphoreHandle_t xKeypadSemaphore;
 
 /*****************************   Constants   *******************************/
 
-char **keypadArr;
-
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-char **createArray(int m, int n) { // m = rows, n = columns
+#define RowsSize 4
+#define ColsSize 3
 
-    // Values is the initial "box" of pointers. It has the size of
-    // m*n*sizeof(int). Thereby it should be able to contain all the values
-    // needed.
-    char *values = (char *)(calloc(m * n, sizeof(char)));
+char look_table[RowsSize][ColsSize] = {
+    {'#', '0', '*'}, {'9', '8', '7'}, {'6', '5', '4'}, {'3', '2', '1'}};
 
-    // Error check. If values is a null pointer the function returns NULL
-    if (values == NULL) {
-        // printf("Memory allocation failed for values!\n");
-        return NULL;
+void keypad_scan() {
+    char i, j;
+    for (i = 0; i < 3; i++) {
+        GPIO_PORTA_DATA_R = (0x01 << i + 2);
+        //    vTaskDelay(2 / portTICK_RATE_MS);
+        for (j = 0; j < 4; j++) {
+            if ((GPIO_PORTE_DATA_R & 0x0F) & (0x01 << j)) {
+                xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
+                char keypadPressVal = look_table[j][i];
+                xQueueSend(xKeypadQueue, &keypadPressVal, (TickType_t)10);
+                xSemaphoreGive(xKeypadSemaphore);
+                break;
+            }
+        }
     }
-
-    // Rows is the "Start" of all the 2D arrays created within values.
-    char **rowsInit = (char **)(malloc(m * sizeof(char *)));
-    // Error check. If rows is a null pointer the function returns NULL
-    if (rowsInit == NULL) {
-        // printf("Memory allocation failed for rows!\n");
-        free(values); // Free previously allocated memory
-        return NULL;
-    }
-    int i;
-    for (i = 0; i < m; i++) {
-        rowsInit[i] =
-            values + i * n; // Calculate memory address, corresponding to the
-                            // i'th row in the values block. i * n is the offset
-                            // to reach the start of the i'th row
-    }
-    return rowsInit;
 }
 
-void destroyArray(char **arr) {
-    free(*arr); // Free the space
-    free(arr);
-}
-
-void fillKeypadArr(char **arr) {
-    arr[0][0] = '1';
-    arr[0][1] = '2';
-    arr[0][2] = '3';
-    arr[1][0] = '4';
-    arr[1][1] = '5';
-    arr[1][2] = '6';
-    arr[2][0] = '7';
-    arr[2][1] = '8';
-    arr[2][2] = '9';
-    arr[3][0] = '*';
-    arr[3][1] = '0';
-    arr[3][2] = '#';
-}
-
-void init_keypad_and_arr() {
+void init_keypad() {
     if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
     }
@@ -112,93 +69,24 @@ void init_keypad_and_arr() {
 
     // Enable GPIO pins,
     GPIO_PORTA_DEN_R |= 0x1C;
-    GPIO_PORTE_DEN_R |= 0x0E;
+    GPIO_PORTE_DEN_R |= 0x0F;
 
     // The rows get pull up pins, we will use these as inputs.
     // The rows are the ones with the most
     // GPIO_PORTE_PUR_R |= 0X1C;
-    GPIO_PORTE_PDR_R |= 0x0E;
+    GPIO_PORTE_PDR_R |= 0x0F;
 
     // PORT A as outputs
-    GPIO_PORTA_DIR_R |= 0X1C;
-
-    // Make an array for the keypad
-    keypadArr =
-        createArray(rows, cols); // The size of the Keypad 4 rows and 3 columns
-    fillKeypadArr(keypadArr);
-}
-
-void keypad_press() {
-
-    uint8_t colCheckVal =
-        0x04; // This value corresponds with the first GPIO port and will be
-              // bitshifted to correspond with the next
-    char keypadPressVal;
-    int  i = 0;
-
-    for (i = 0; i < cols; i++) {
-
-        uint8_t rowCheckVal =
-            0x01; // This value corresponds with the first GPIO port and will be
-                  // bitshifted to correspond with the next
-        int j = 0;
-        GPIO_PORTA_DATA_R &= CLEAR;
-        GPIO_PORTA_DATA_R |= colCheckVal;
-
-        switch (colCheckVal) {
-            case colX1: {
-                for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                        keypadPressVal = keypadArr[j][i];
-                        xQueueSend(xKeypadQueue, &keypadPressVal,
-                                   (TickType_t)10);
-                        xSemaphoreGive(xKeypadSemaphore);
-                        break;
-                    }
-                }
-                break;
-            }
-            case colX2: {
-                for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                        keypadPressVal = keypadArr[j][i];
-                        xQueueSend(xKeypadQueue, &keypadPressVal,
-                                   (TickType_t)10);
-                        xSemaphoreGive(xKeypadSemaphore);
-                        break;
-                    }
-                }
-                break;
-            }
-            case colX3: {
-                for (j = 0; j < rows; j++) {
-                    if (GPIO_PORTE_DATA_R & (rowCheckVal)) {
-                        xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                        keypadPressVal = keypadArr[j][i];
-                        xQueueSend(xKeypadQueue, &keypadPressVal,
-                                   (TickType_t)10);
-                        xSemaphoreGive(xKeypadSemaphore);
-                        break;
-                    }
-                }
-                break;
-            }
-            default:
-                break;
-        }
-        colCheckVal <<= 1;
-    }
+    GPIO_PORTA_DIR_R |= 0x1C;
 }
 
 void keypad_task(void *pvParameters) {
 
-    init_keypad_and_arr();
+    init_keypad();
+
     while (1) {
-        keypad_press();
+        keypad_scan();
     }
-    //  destroyArray(keypadArr);
 }
 
 /****************************** End Of Module *******************************/
