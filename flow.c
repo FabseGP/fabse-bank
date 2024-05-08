@@ -70,7 +70,7 @@ void balance() {
     lcd_array_send(money_text);
 
     while (running) {
-        if (index == 3) {
+        if (index == 4) {
             money =
                 amount[0] * 1000 + amount[1] * 100 + amount[2] * 10 + amount[3];
             if (money <= 9999) {
@@ -80,6 +80,8 @@ void balance() {
             } else {
                 char baka_text[] = ">Why you dumb...? /Try again!";
                 lcd_array_send(baka_text);
+                index = 0;
+                lcd_array_send(money_text);
             }
         } else {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
@@ -104,7 +106,7 @@ void security_code() {
     lcd_array_send(security_text);
 
     while (running) {
-        if (index == 3) {
+        if (index == 4) {
             password = security[0] * 1000 + security[1] * 100 +
                        security[2] * 10 + security[3];
             if (password % 8 == 0) {
