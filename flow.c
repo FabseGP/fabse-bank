@@ -17,13 +17,12 @@
 
 #include "FreeRTOS.h"
 #include "global_def.h"
-#include "lcd.h"
 #include "queue.h"
-#include "rotary.h"
 #include "semphr.h"
 #include "string.h"
 #include "tm4c123gh6pm.h"
 #include <stdint.h>
+#include <stdlib.h>
 
 /*****************************    Defines    *******************************/
 
@@ -52,10 +51,17 @@ void welcome() {
 
     // "/" = new line, ">" = 2s delay + new screen
     char fabse_text[] = ">Welcome to /Fabse's bank!>Come closer /Money awaits";
+    uint8_t running   = 1, button_press;
 
     lcd_array_send(fabse_text);
 
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    while (running) {
+        if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
+            xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
+            running = 0;
+            xSemaphoreGive(xSW1Semaphore);
+        }
+    }
 }
 
 void balance() {
@@ -71,8 +77,8 @@ void balance() {
 
     while (running) {
         if (index == 4) {
-            money =
-                amount[0] * 1000 + amount[1] * 100 + amount[2] * 10 + amount[3];
+            money = atoi(amount[0]) * 1000 + atoi(amount[1]) * 100 +
+                    atoi(amount[2]) * 10 + atoi(amount[3]);
             if (money <= 9999) {
                 char congratulations[] = ">You succeeded!";
                 lcd_array_send(congratulations);
@@ -107,8 +113,8 @@ void security_code() {
 
     while (running) {
         if (index == 4) {
-            password = security[0] * 1000 + security[1] * 100 +
-                       security[2] * 10 + security[3];
+            password = atoi(security[0]) * 1000 + atoi(security[1]) * 100 +
+                       atoi(security[2]) * 10 + atoi(security[3]);
             if (password % 8 == 0) {
                 char congratulations[] = ">You succeeded!";
                 lcd_array_send(congratulations);
@@ -253,18 +259,12 @@ void coinage() {
             pdPASS) {
             xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
             if (rotary_event != 'P') {
-                if (rotary_event == 'R') {
-                    if (state < 2) {
-                        state++;
-                    } else if (state == 2) {
-                        state = 0;
-                    }
-                } else if (rotary_event == 'L') {
-                    if (state < 2) {
-                        state++;
-                    } else if (state == 2) {
-                        state = 0;
-                    }
+                if (state < 2) {
+                    state++;
+                } else if (state == 2) {
+                    state = 0;
+                } else if (state == 0) {
+                    state = 2;
                 }
                 print_lcd = 1;
             } else {
