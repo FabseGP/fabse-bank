@@ -204,7 +204,7 @@ void withdraw() {
             if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
                 pdPASS) {
                 xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
-                if (withdraw_amount > money) {
+                if (withdraw_amount < money) {
                     char baka_text[] = ">Why you dumb...?/Try again!";
                     lcd_array_send(baka_text);
                     vTaskDelay(2000 / portTICK_RATE_MS);
