@@ -58,7 +58,7 @@ enum Delay { Timer1a_on = 0 };
 
 /*****************************   Variables   *******************************/
 
-extern uint8_t  withdraw_type;
+extern uint8_t  withdraw_type, blink_led;
 extern uint16_t money, password, withdraw_amount, delay_timer;
 
 enum BankState {
