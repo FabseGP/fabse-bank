@@ -103,9 +103,9 @@ void switch_debouncer() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t debounce_counter = 0, old_press = GPIO_PORTF_DATA_R, new_press,
-            running = 1;
-    while (running) {
+    uint8_t debounce_counter = 0, old_press = GPIO_PORTF_DATA_R, new_press;
+
+    while (debounce_counter <= Debounce_time) {
         new_press = GPIO_PORTF_DATA_R;
         if (debounce_counter == Debounce_time) {
             uint8_t button_press = 1;
@@ -118,7 +118,6 @@ void switch_debouncer() {
                 xQueueSend(xSW2Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW2Semaphore);
             }
-            running = 0;
         }
         if (new_press & old_press) {
             debounce_counter++;

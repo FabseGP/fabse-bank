@@ -26,7 +26,7 @@
 
 /*****************************    Defines    *******************************/
 
-enum States { Clear_interrupt = 0x20 };
+enum States { Debounce_time = 20, Clear_interrupt = 0xA0, Clear = 0 };
 
 QueueHandle_t     xRotaryQueue;
 SemaphoreHandle_t xRotarySemaphore;
@@ -45,18 +45,18 @@ void init_rotary_interrupt() {
     // Table 10-4 have a good overview of the interrupt registers
 
     // if cleared = detect falling/rising edges,  otherwise low/high levels
-    GPIO_PORTA_IS_R &= ~(0x20);
+    GPIO_PORTA_IS_R &= ~(0xA0);
 
     // if cleared = can adjust if interrupted on falling or rising edges
     // otherwise on both falling and rising edges
-    GPIO_PORTA_IBE_R |= 0x20;
+    GPIO_PORTA_IBE_R |= 0xA0;
 
     // allows interrupts to (quote from datasheet) "be sent to the interrupt
     // controller on the combined interrupt signal"
-    GPIO_PORTA_IM_R |= 0x20;
+    GPIO_PORTA_IM_R |= 0xA0;
 
     // clears any previous interrupts on pin PA5
-    GPIO_PORTA_ICR_R |= 0x20;
+    GPIO_PORTA_ICR_R |= Clear_interrupt;
 
     // Check table 2-9 on the datasheet for the interrupt table, there you can
     // see that the interrupt number for PORTA is 0
@@ -81,39 +81,54 @@ void init_rotary() {
     // Enable the GPIO pins for digital function (PA5 - PA7)
     GPIO_PORTA_DEN_R |= 0xE0;
 
-    // Enable internal pull-up (PA7).
+    // Enable internal pull-up (PA7)
     GPIO_PORTA_PUR_R |= 0x80;
 
     init_rotary_interrupt();
 }
 
-void debouncer() {}
+void rotary_debouncer() {
+    /*****************************************************************************
+     *   Function : See module specification (.h-file)
+     *****************************************************************************/
+
+    uint8_t debounce_counter = 0, old_transition = GPIO_PORTA_DATA_R,
+            new_transition;
+
+    while (debounce_counter <= Debounce_time) {
+        new_transition = GPIO_PORTA_DATA_R;
+        if (debounce_counter == Debounce_time) {
+            char direction;
+            // Checks if PA5 and PA6 have the same state
+            if ((new_transition & 0x20) && (new_transition & 0x40)) {
+                direction = 'L';
+            } else if (new_transition & 0x80) {
+                direction = 'P';
+            } else {
+                direction = 'R';
+            }
+            xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+            xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
+            xSemaphoreGive(xRotarySemaphore);
+        }
+        if (new_transition & old_transition) {
+            debounce_counter++;
+        } else {
+            debounce_counter = Clear;
+        }
+        old_transition = new_transition;
+    }
+
+    // Clears any previous interrupts on pin PF4 & PF0
+    GPIO_PORTA_ICR_R |= Clear_interrupt;
+}
 
 void rotary_interrupt_handler() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    // Checks if PA5 and PA6 have the same state
-    if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
-        char direction = 'L';
-        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
-        xSemaphoreGive(xRotarySemaphore);
-    } else if (GPIO_PORTA_DATA_R & ~(0x80)) {
-        char direction = 'P';
-        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
-        xSemaphoreGive(xRotarySemaphore);
-    } else {
-        char direction = 'R';
-        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
-        xSemaphoreGive(xRotarySemaphore);
-    }
-
-    // Clears any previous interrupts on PA5
-    GPIO_PORTA_ICR_R |= Clear_interrupt;
+    rotary_debouncer();
 }
 
 /****************************** End Of Module *******************************/
