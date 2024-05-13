@@ -33,6 +33,7 @@ static void NmiSR(void);
 static void FaultISR(void);
 static void IntDefaultHandler(void);
 
+void        encoder_button_interrupt_handler();
 void        switch_interrupt_handler();
 void        rotary_interrupt_handler();
 void        timer1a_interrupt_handler();

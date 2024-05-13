@@ -87,7 +87,7 @@ int main() {
     init_adc();
     init_switches();
     init_leds();
-    init_rotary();
+    init_encoder_interrupt();
     init_queues_semaphores();
     if (Timer1a_on == 1) {
         // 1 = 4 ms, 250 = 1 s (setting the prescaler)
