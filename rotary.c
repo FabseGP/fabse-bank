@@ -45,18 +45,18 @@ void init_rotary_interrupt() {
     // Table 10-4 have a good overview of the interrupt registers
 
     // if cleared = detect falling/rising edges,  otherwise low/high levels
-    GPIO_PORTA_IS_R &= ~(0xA0);
+    GPIO_PORTA_IS_R &= ~(0x20);
 
     // if cleared = can adjust if interrupted on falling or rising edges
     // otherwise on both falling and rising edges
-    GPIO_PORTA_IBE_R |= 0xA0;
+    GPIO_PORTA_IBE_R |= 0x20;
 
     // allows interrupts to (quote from datasheet) "be sent to the interrupt
     // controller on the combined interrupt signal"
-    GPIO_PORTA_IM_R |= 0xA0;
+    GPIO_PORTA_IM_R |= 0x20;
 
     // clears any previous interrupts on pin PA5
-    GPIO_PORTA_ICR_R |= 0xA0;
+    GPIO_PORTA_ICR_R |= 0x20;
 
     // Check table 2-9 on the datasheet for the interrupt table, there you can
     // see that the interrupt number for PORTA is 0
@@ -100,14 +100,12 @@ void rotary_interrupt_handler() {
         xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
         xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
         xSemaphoreGive(xRotarySemaphore);
-    }
-    // else if (GPIO_PORTA_DATA_R & 0x80) {
-    //     char direction = 'P';
-    //     xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-    //     xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
-    //     xSemaphoreGive(xRotarySemaphore);
-    // }
-    else {
+    } else if (GPIO_PORTA_DATA_R & ~(0x80)) {
+        char direction = 'P';
+        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
+        xSemaphoreGive(xRotarySemaphore);
+    } else {
         char direction = 'R';
         xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
         xQueueSend(xRotaryQueue, &direction, (TickType_t)10);

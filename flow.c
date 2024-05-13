@@ -274,7 +274,7 @@ void coinage() {
         if (xQueueReceive(xRotaryQueue, &rotary_event, (TickType_t)10) ==
             pdPASS) {
             xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-            if (GPIO_PORTA_DATA_R & 0x80) {
+            if (rotary_event == 'P') {
                 if (withdraw_amount % withdraw_type == 0) {
                     lcd_array_send(congratulations);
                     running = 0;
