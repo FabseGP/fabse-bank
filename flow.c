@@ -184,7 +184,7 @@ void withdraw() {
         }
         if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
             xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
-            if (state > 3) {
+            if (state >= 3) {
                 state = 0;
             } else {
                 state++;
@@ -222,7 +222,7 @@ void coinage() {
     lcd_array_send(coinage_text);
 
     while (running) {
-        char rotary_event, type[7];
+        char rotary_event, type[6];
         if (print_lcd == 1) {
             switch (state) {
                 case 0:
