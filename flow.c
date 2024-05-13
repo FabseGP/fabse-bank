@@ -38,6 +38,12 @@ uint16_t money, password, withdraw_amount, delay_timer;
 
 /*****************************   Functions   *******************************/
 
+void baka(char arr[]) {
+    lcd_array_send(baka_text);
+    vTaskDelay(2000 / portTICK_RATE_MS);
+    lcd_array_send(arr);
+}
+
 void lcd_array_send(char data[]) {
     char i;
     xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
@@ -85,18 +91,21 @@ void balance() {
                 lcd_array_send(congratulations);
                 running = 0;
             } else {
-                lcd_array_send(baka_text);
-                vTaskDelay(2000 / portTICK_RATE_MS);
-                lcd_array_send(money_text);
+                baka(money_text);
                 index = 0;
             }
         } else {
             if (xQueueReceive(xKeypadQueue, &amount[index], (TickType_t)10) ==
                 pdPASS) {
-                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                xQueueSend(xLCDQueue, &amount[index], (TickType_t)10);
-                xSemaphoreGive(xLCDSemaphore);
-                index++;
+                if (amount[index] == '#' || amount[index] == '*') {
+                    baka(money_text);
+                    index = 0;
+                } else {
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    xQueueSend(xLCDQueue, &amount[index], (TickType_t)10);
+                    xSemaphoreGive(xLCDSemaphore);
+                    index++;
+                }
             }
         }
     }
@@ -119,18 +128,21 @@ void security_code() {
                 lcd_array_send(congratulations);
                 running = 0;
             } else {
-                lcd_array_send(baka_text);
-                vTaskDelay(2000 / portTICK_RATE_MS);
-                lcd_array_send(security_text);
+                baka(security_text);
                 index = 0;
             }
         } else {
             if (xQueueReceive(xKeypadQueue, &security[index], (TickType_t)10) ==
                 pdPASS) {
-                xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-                xQueueSend(xLCDQueue, &security[index], (TickType_t)10);
-                xSemaphoreGive(xLCDSemaphore);
-                index++;
+                if (security[index] == '#' || security[index] == '*') {
+                    baka(security_text);
+                    index = 0;
+                } else {
+                    xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
+                    xQueueSend(xLCDQueue, &security[index], (TickType_t)10);
+                    xSemaphoreGive(xLCDSemaphore);
+                    index++;
+                }
             }
         }
     }
@@ -184,9 +196,10 @@ void withdraw() {
 
         if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
             xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
-            state++;
             if (state > 3) {
                 state = 0;
+            } else {
+                state++;
             }
             print_lcd = 1;
             xSemaphoreGive(xSW1Semaphore);
@@ -198,9 +211,7 @@ void withdraw() {
                 pdPASS) {
                 xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
                 if (money < withdraw_amount) {
-                    lcd_array_send(baka_text);
-                    vTaskDelay(2000 / portTICK_RATE_MS);
-                    lcd_array_send(withdraw_text);
+                    baka(withdraw_text);
                     print_lcd = 1;
                 } else {
                     lcd_array_send(congratulations);
@@ -224,7 +235,7 @@ void coinage() {
     lcd_array_send(coinage);
 
     while (running) {
-        uint8_t rotary_event, double_press;
+        char rotary_event;
         switch (state) {
             case 0:
                 if (print_lcd == 1) {
@@ -263,33 +274,26 @@ void coinage() {
         if (xQueueReceive(xRotaryQueue, &rotary_event, (TickType_t)10) ==
             pdPASS) {
             xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-            if (state < 2) {
-                state++;
-            } else if (state == 2) {
-                state = 0;
-            } else if (state == 0) {
-                state = 2;
-            }
-            print_lcd = 1;
-            xSemaphoreGive(xRotarySemaphore);
-        }
-
-        if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) == pdPASS) {
-            vTaskDelay(200 / portTICK_RATE_MS);
-            if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
-                pdPASS) {
-                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
+            if (GPIO_PORTA_DATA_R & 0x80) {
                 if (withdraw_amount % withdraw_type == 0) {
                     lcd_array_send(congratulations);
                     running = 0;
+
                 } else {
-                    lcd_array_send(baka_text);
-                    vTaskDelay(2000 / portTICK_RATE_MS);
-                    lcd_array_send(coinage);
+                    baka(coinage);
                     print_lcd = 1;
                 }
-                xSemaphoreGive(xSW2Semaphore);
+            } else {
+                if (state < 2) {
+                    state++;
+                } else if (state == 2) {
+                    state = 0;
+                } else if (state == 0) {
+                    state = 2;
+                }
+                print_lcd = 1;
             }
+            xSemaphoreGive(xRotarySemaphore);
         }
     }
 }
@@ -305,7 +309,7 @@ void print_money() {
 
     lcd_array_send(print_text);
     vTaskDelay(5000 / portTICK_RATE_MS);
-
+    withdraw_amount *= 2;
     while (running) {
         uint16_t adc_value = get_adc();
         withdraw_amount -= withdraw_type;
