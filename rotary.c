@@ -26,7 +26,7 @@
 
 /*****************************    Defines    *******************************/
 
-enum States { Clear_interrupt = 0x20 };
+enum States { Clear_interrupt = 0xA0 };
 
 QueueHandle_t     xRotaryQueue;
 SemaphoreHandle_t xRotarySemaphore;
@@ -37,7 +37,7 @@ SemaphoreHandle_t xRotarySemaphore;
 
 /*****************************   Functions   *******************************/
 
-void init_rotary_interrupt() {
+void init_encoder_interrupt() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
@@ -45,18 +45,18 @@ void init_rotary_interrupt() {
     // Table 10-4 have a good overview of the interrupt registers
 
     // if cleared = detect falling/rising edges,  otherwise low/high levels
-    GPIO_PORTA_IS_R &= ~(0x20);
+    GPIO_PORTA_IS_R &= ~(0xA0);
 
     // if cleared = can adjust if interrupted on falling or rising edges
     // otherwise on both falling and rising edges
-    GPIO_PORTA_IBE_R |= 0x20;
+    GPIO_PORTA_IBE_R |= 0xA0;
 
     // allows interrupts to (quote from datasheet) "be sent to the interrupt
     // controller on the combined interrupt signal"
-    GPIO_PORTA_IM_R |= 0x20;
+    GPIO_PORTA_IM_R |= 0xA0;
 
     // clears any previous interrupts on pin PA5
-    GPIO_PORTA_ICR_R |= 0x20;
+    GPIO_PORTA_ICR_R |= 0xA0;
 
     // Check table 2-9 on the datasheet for the interrupt table, there you can
     // see that the interrupt number for PORTA is 0
@@ -78,30 +78,46 @@ void init_rotary() {
         SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
     }
 
-    // Enable the GPIO pins for digital function (PA5 - PA7)
+    // Disable the GPIO pins for digital function (PA7)
+    GPIO_PORTA_DEN_R &= ~(0x9F);
     GPIO_PORTA_DEN_R |= 0xE0;
+
+    // Disable internal pull-up (PA7).
+    GPIO_PORTA_PUR_R &= ~(0x80);
+}
+
+void init_button_press() {
+    if (SYSCTL_RCGC2_R != SYSCTL_RCGC2_GPIOA) {
+        SYSCTL_RCGC2_R |= SYSCTL_RCGC2_GPIOA;
+    }
+
+    // Enable the GPIO pins for digital function (PA5 - PA7)
+    GPIO_PORTA_DEN_R &= ~(0x7F);
+    GPIO_PORTA_DEN_R |= 0x80;
 
     // Enable internal pull-up (PA7).
     GPIO_PORTA_PUR_R |= 0x80;
-
-    init_rotary_interrupt();
 }
 
-void debouncer() {}
+void encoder_button_interrupt_handler() {
+    init_button_press();
+
+    if (GPIO_PORTA_DATA_R & (0x80)) {
+        char direction = 'P';
+        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
+        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
+        xSemaphoreGive(xRotarySemaphore);
+    }
+}
 
 void rotary_interrupt_handler() {
     /*****************************************************************************
      *   Function : See module specification (.h-file)
      *****************************************************************************/
-
+    init_rotary();
     // Checks if PA5 and PA6 have the same state
     if ((GPIO_PORTA_DATA_R & 0x20) && (GPIO_PORTA_DATA_R & 0x40)) {
         char direction = 'L';
-        xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-        xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
-        xSemaphoreGive(xRotarySemaphore);
-    } else if (GPIO_PORTA_DATA_R & ~(0x80)) {
-        char direction = 'P';
         xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
         xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
         xSemaphoreGive(xRotarySemaphore);
