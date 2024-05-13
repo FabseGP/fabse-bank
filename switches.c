@@ -25,7 +25,7 @@
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer {
-    Debounce_time   = 100,
+    Debounce_time   = 20,
     Clear_interrupt = 0x11,
     Clear           = 0,
     SW1             = 0x01,
@@ -103,27 +103,29 @@ void switch_debouncer() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t debounce_counter = 0, old_press = GPIO_PORTF_DATA_R;
-
-    while (debounce_counter < Debounce_time) {
-        if (GPIO_PORTF_DATA_R & old_press) {
-            debounce_counter++;
-        } else {
-            debounce_counter = Clear;
-        }
+    uint8_t debounce_counter = 0, old_press = GPIO_PORTF_DATA_R, new_press,
+            running = 1;
+    while (running) {
+        new_press = GPIO_PORTF_DATA_R;
         if (debounce_counter == Debounce_time) {
             uint8_t button_press = 1;
-            if (GPIO_PORTF_DATA_R & SW1) {
+            if (new_press & SW1) {
                 xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
                 xQueueSend(xSW1Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW1Semaphore);
-            } else if (GPIO_PORTF_DATA_R & SW2) {
+            } else if (new_press & SW2) {
                 xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
                 xQueueSend(xSW2Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW2Semaphore);
             }
+            running = 0;
         }
-        old_press = GPIO_PORTF_DATA_R;
+        if (new_press & old_press) {
+            debounce_counter++;
+        } else {
+            debounce_counter = Clear;
+        }
+        old_press = new_press;
     }
 
     // Clears any previous interrupts on pin PF4 & PF0
