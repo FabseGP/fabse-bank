@@ -16,6 +16,7 @@
 /***************************** Include files *******************************/
 
 #include "FreeRTOS.h"
+#include "adc.h"
 #include "global_def.h"
 #include "queue.h"
 #include "semphr.h"
@@ -38,12 +39,6 @@ uint16_t money, password, withdraw_amount, delay_timer;
 
 /*****************************   Functions   *******************************/
 
-void baka(char arr[]) {
-    lcd_array_send(baka_text);
-    vTaskDelay(2000 / portTICK_RATE_MS);
-    lcd_array_send(arr);
-}
-
 void lcd_array_send(char data[]) {
     char i;
     xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
@@ -51,6 +46,12 @@ void lcd_array_send(char data[]) {
         xQueueSend(xLCDQueue, &data[i], (TickType_t)10);
     }
     xSemaphoreGive(xLCDSemaphore);
+}
+
+void baka(char arr[]) {
+    lcd_array_send(baka_text);
+    vTaskDelay(2000 / portTICK_RATE_MS);
+    lcd_array_send(arr);
 }
 
 void welcome() {
@@ -151,49 +152,36 @@ void security_code() {
 void withdraw() {
     uint8_t running = 1, state = 0, print_lcd = 1;
     char    withdraw_text[] = ">Withdraw amount:/";
-    withdraw_amount         = 500;
 
     lcd_array_send(withdraw_text);
 
     while (running) {
         uint8_t button_press, double_press;
-        switch (state) {
-            case 0:
-                if (print_lcd == 1) {
-                    char amount[] = "/500";
-                    lcd_array_send(amount);
-                    print_lcd = 0;
-                }
-                withdraw_amount = 500;
-                break;
-            case 1:
-                if (print_lcd == 1) {
-                    char amount[] = "/200";
-                    lcd_array_send(amount);
-                    print_lcd = 0;
-                }
-                withdraw_amount = 200;
-                break;
-            case 2:
-                if (print_lcd == 1) {
-                    char amount[] = "/100";
-                    lcd_array_send(amount);
-                    print_lcd = 0;
-                }
-                withdraw_amount = 100;
-                break;
-            case 3:
-                if (print_lcd == 1) {
-                    char amount[] = "/50 ";
-                    lcd_array_send(amount);
-                    print_lcd = 0;
-                }
-                withdraw_amount = 50;
-                break;
-            default:
-                break;
+        char    amount[4];
+        if (print_lcd == 1) {
+            switch (state) {
+                case 0:
+                    strcpy(amount, "/500");
+                    withdraw_amount = 500;
+                    break;
+                case 1:
+                    strcpy(amount, "/200");
+                    withdraw_amount = 200;
+                    break;
+                case 2:
+                    strcpy(amount, "/100");
+                    withdraw_amount = 100;
+                    break;
+                case 3:
+                    strcpy(amount, "/50 ");
+                    withdraw_amount = 50;
+                    break;
+                default:
+                    break;
+            }
+            lcd_array_send(amount);
+            print_lcd = 0;
         }
-
         if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) == pdPASS) {
             xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
             if (state > 3) {
@@ -229,69 +217,70 @@ void coinage() {
      *****************************************************************************/
 
     uint8_t running = 1, state = 0, print_lcd = 1;
-    char    coinage[] = ">Withdraw type:/";
-    withdraw_type     = 100;
+    char    coinage_text[] = ">Withdraw type:/";
 
-    lcd_array_send(coinage);
+    lcd_array_send(coinage_text);
 
     while (running) {
-        char rotary_event;
-        switch (state) {
-            case 0:
-                if (print_lcd == 1) {
-                    char type[] = "/100 kr";
-                    lcd_array_send(type);
-                    print_lcd = 0;
-                }
-                withdraw_type = 100;
-                delay_timer   = 1000;
-                blink_led     = 0x02;
-                break;
-            case 1:
-                if (print_lcd == 1) {
-                    char type[] = "/50 kr ";
-                    lcd_array_send(type);
-                    print_lcd = 0;
-                }
-                withdraw_type = 50;
-                delay_timer   = 500;
-                blink_led     = 0x04;
-                break;
-            case 2:
-                if (print_lcd == 1) {
-                    char type[] = "/10 kr ";
-                    lcd_array_send(type);
-                    print_lcd = 0;
-                }
-                withdraw_type = 10;
-                delay_timer   = 250;
-                blink_led     = 0x08;
-                break;
-            default:
-                break;
+        char rotary_event, type[7];
+        if (print_lcd == 1) {
+            switch (state) {
+                case 0:
+                    strcpy(type, "/100 kr");
+                    withdraw_type = 100;
+                    delay_timer   = 1000;
+                    blink_led     = 0x02;
+                    break;
+                case 1:
+                    strcpy(type, "/50 kr ");
+                    withdraw_type = 50;
+                    delay_timer   = 500;
+                    blink_led     = 0x04;
+                    break;
+                case 2:
+                    strcpy(type, "/10 kr ");
+                    withdraw_type = 10;
+                    delay_timer   = 250;
+                    blink_led     = 0x08;
+                    break;
+                default:
+                    break;
+            }
+            lcd_array_send(type);
+            print_lcd = 0;
         }
 
         if (xQueueReceive(xRotaryQueue, &rotary_event, (TickType_t)10) ==
             pdPASS) {
             xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
-            if (rotary_event == 'P') {
-                if (withdraw_amount % withdraw_type == 0) {
-                    lcd_array_send(congratulations);
-                    running = 0;
-
-                } else {
-                    baka(coinage);
+            switch (rotary_event) {
+                case 'R':
+                    if (state >= 0 && state < 2) {
+                        state++;
+                    } else {
+                        state = 0;
+                    }
                     print_lcd = 1;
-                }
-            } else {
-                if (state < 2) {
-                    state++;
-                } else if (state == 2) {
-                    state = 0;
-                } else if (state == 0) {
-                    state = 2;
-                }
-                print_lcd = 1;
+                    break;
+                case 'L':
+                    if (state > 0 && state <= 2) {
+                        state--;
+                    } else {
+                        state = 2;
+                    }
+                    print_lcd = 1;
+                    break;
+                case 'P':
+                    if (withdraw_amount % withdraw_type == 0) {
+                        lcd_array_send(congratulations);
+                        running = 0;
+                    } else {
+                        baka(coinage_text);
+                        print_lcd = 1;
+                    }
+                    break;
+                default:
+                    break;
             }
             xSemaphoreGive(xRotarySemaphore);
         }

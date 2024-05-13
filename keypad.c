@@ -43,16 +43,21 @@ char look_table[RowsSize][ColsSize] = {
     {'#', '0', '*'}, {'9', '8', '7'}, {'6', '5', '4'}, {'3', '2', '1'}};
 
 void keypad_scan() {
-    char i, j;
+    uint8_t exit = 0, i, j;
     for (i = 0; i < 3; i++) {
         GPIO_PORTA_DATA_R = (0x01 << i + 2);
         for (j = 0; j < 4; j++) {
             if (GPIO_PORTE_DATA_R & (0x01 << j)) {
-                vTaskDelay(250 / portTICK_RATE_MS);
+                vTaskDelay(160 / portTICK_RATE_MS);
                 xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                 char keypadPressVal = look_table[j][i];
                 xQueueSend(xKeypadQueue, &keypadPressVal, (TickType_t)10);
                 xSemaphoreGive(xKeypadSemaphore);
+                exit = 1;
+                break;
+            }
+            if (exit == 1) {
+                break;
             }
         }
     }
