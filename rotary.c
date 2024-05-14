@@ -26,7 +26,7 @@
 
 /*****************************    Defines    *******************************/
 
-enum States { Debounce_time = 50, Clear_interrupt = 0xA0, Clear = 0 };
+enum States { Debounce_time = 100, Clear_interrupt = 0xA0, Clear = 0 };
 
 QueueHandle_t     xRotaryQueue;
 SemaphoreHandle_t xRotarySemaphore;

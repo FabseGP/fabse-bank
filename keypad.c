@@ -48,10 +48,9 @@ void keypad_scan() {
         GPIO_PORTA_DATA_R = (0x01 << i + 2);
         for (j = 0; j < 4; j++) {
             if (GPIO_PORTE_DATA_R & (0x01 << j)) {
-                vTaskDelay(160 / portTICK_RATE_MS);
+                vTaskDelay(200 / portTICK_RATE_MS);
                 xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
-                char keypadPressVal = look_table[j][i];
-                xQueueSend(xKeypadQueue, &keypadPressVal, (TickType_t)10);
+                xQueueSend(xKeypadQueue, &look_table[j][i], (TickType_t)10);
                 xSemaphoreGive(xKeypadSemaphore);
                 exit = 1;
                 break;

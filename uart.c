@@ -192,13 +192,12 @@ void uart0_task(void *pvParameters) {
     uart0_init(9600, 8, 1, 'n');
 
     while (1) {
-        /*
-                uint8_t data;
-                if (xQueueReceive(xUARTQueue, &data, (TickType_t)10) == pdPASS)
-           { xSemaphoreTake(xUARTSemaphore, (TickType_t)10); uart0_putc(data);
-                    xSemaphoreGive(xUARTSemaphore);
-                }
-                */
+        uint8_t data;
+        if (xQueueReceive(xUARTQueue, &data, (TickType_t)10) == pdPASS) {
+            xSemaphoreTake(xUARTSemaphore, (TickType_t)10);
+            uart0_putc(data);
+            xSemaphoreGive(xUARTSemaphore);
+        }
     }
 }
 
