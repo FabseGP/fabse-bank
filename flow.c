@@ -88,7 +88,7 @@ void balance() {
     while (running) {
         if (index == 4) {
             money = atoi(amount);
-            if (money <= 9999) {
+            if (money > 50 && money <= 9999) {
                 lcd_array_send(congratulations);
                 running = 0;
             } else {
@@ -157,23 +157,23 @@ void withdraw() {
 
     while (running) {
         uint8_t button_press, double_press;
-        char    amount[4];
+        char    amount[6];
         if (print_lcd == 1) {
             switch (state) {
                 case 0:
-                    strcpy(amount, "/500");
+                    strcpy(amount, "/500 kr");
                     withdraw_amount = 500;
                     break;
                 case 1:
-                    strcpy(amount, "/200");
+                    strcpy(amount, "/200 kr");
                     withdraw_amount = 200;
                     break;
                 case 2:
-                    strcpy(amount, "/100");
+                    strcpy(amount, "/100 kr");
                     withdraw_amount = 100;
                     break;
                 case 3:
-                    strcpy(amount, "/50 ");
+                    strcpy(amount, "/50 kr ");
                     withdraw_amount = 50;
                     break;
                 default:
@@ -206,6 +206,15 @@ void withdraw() {
                     running = 0;
                 }
                 xSemaphoreGive(xSW2Semaphore);
+            } else {
+                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
+                if (state == 0) {
+                    state = 3;
+                } else {
+                    state--;
+                }
+                print_lcd = 1;
+                xSemaphoreGive(xSW2Semaphore);
             }
         }
     }
@@ -222,7 +231,7 @@ void coinage() {
     lcd_array_send(coinage_text);
 
     while (running) {
-        char rotary_event, type[6];
+        char rotary_event, type[7], double_press;
         if (print_lcd == 1) {
             switch (state) {
                 case 0:
@@ -255,7 +264,7 @@ void coinage() {
             xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
             switch (rotary_event) {
                 case 'R':
-                    if (state >= 0 && state < 2) {
+                    if (state < 2) {
                         state++;
                     } else {
                         state = 0;
@@ -283,6 +292,21 @@ void coinage() {
                     break;
             }
             xSemaphoreGive(xRotarySemaphore);
+        }
+        if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) == pdPASS) {
+            vTaskDelay(200 / portTICK_RATE_MS);
+            if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
+                pdPASS) {
+                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
+                if (withdraw_amount % withdraw_type == 0) {
+                    lcd_array_send(congratulations);
+                    running = 0;
+                } else {
+                    baka(coinage_text);
+                    print_lcd = 1;
+                }
+                xSemaphoreGive(xSW2Semaphore);
+            }
         }
     }
 }

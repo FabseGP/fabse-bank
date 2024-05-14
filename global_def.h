@@ -50,10 +50,6 @@ extern SemaphoreHandle_t xSW1Semaphore;
 extern QueueHandle_t     xSW2Queue;
 extern SemaphoreHandle_t xSW2Semaphore;
 
-// 0 = use systick for delay
-// 1 = use timer1a for delay (can still use systick)
-enum Delay { Timer1a_on = 0 };
-
 /*****************************   Constants   *******************************/
 
 /*****************************   Variables   *******************************/

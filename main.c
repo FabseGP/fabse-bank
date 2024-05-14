@@ -30,7 +30,6 @@
 #include "switches.h"
 #include "systick_frt.h"
 #include "task.h"
-#include "timer1a.h"
 #include "tm4c123gh6pm.h"
 #include "uart.h"
 
@@ -66,10 +65,10 @@ void init_queues_semaphores() {
     xRotaryQueue     = xQueueCreate(20, sizeof(uint8_t));
     xRotarySemaphore = xSemaphoreCreateBinary();
 
-    xSW1Queue        = xQueueCreate(10, sizeof(uint8_t));
+    xSW1Queue        = xQueueCreate(20, sizeof(uint8_t));
     xSW1Semaphore    = xSemaphoreCreateBinary();
 
-    xSW2Queue        = xQueueCreate(10, sizeof(uint8_t));
+    xSW2Queue        = xQueueCreate(20, sizeof(uint8_t));
     xSW2Semaphore    = xSemaphoreCreateBinary();
 
     xSemaphoreGive(xLCDSemaphore);
@@ -89,16 +88,9 @@ int main() {
     init_leds();
     init_rotary();
     init_queues_semaphores();
-    if (Timer1a_on == 1) {
-        // 1 = 4 ms, 250 = 1 s (setting the prescaler)
-        init_timer1a(250);
-    }
 
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    //   xTaskCreate(led_task, "LED", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //   NULL);
-    //  xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio,
-    //  NULL);
+    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
     xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,

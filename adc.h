@@ -45,7 +45,7 @@ void init_adc();
  *   Function : Initialize the ADC
  ******************************************************************************/
 
-void adc_interrupt_handler();
+void adc0_interrupt_handler();
 /*****************************************************************************
  *   Input    : -
  *   Output   : -

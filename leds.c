@@ -60,18 +60,4 @@ void init_leds() {
     GPIO_PORTF_DATA_R |= Led_off;
 }
 
-void led_task(void *pvParameters) {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    // Wait 100-1000 ms (200-1000) before blinking the status LED
-    while (1) {
-        GPIO_PORTF_DATA_R ^= 0x40;
-        uint16_t     adc_value = get_adc();
-        portTickType delay     = 1000 - adc_value / 5;
-        vTaskDelay(delay / portTICK_RATE_MS);
-    }
-}
-
 /****************************** End Of Module *******************************/
