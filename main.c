@@ -56,10 +56,10 @@ void init_queues_semaphores() {
     xUARTQueue       = xQueueCreate(30, sizeof(uint8_t));
     xUARTSemaphore   = xSemaphoreCreateBinary();
 
-    xKeypadQueue     = xQueueCreate(10, sizeof(uint8_t));
+    xKeypadQueue     = xQueueCreate(20, sizeof(uint8_t));
     xKeypadSemaphore = xSemaphoreCreateBinary();
 
-    xADCQueue        = xQueueCreate(10, sizeof(uint16_t));
+    xADCQueue        = xQueueCreate(20, sizeof(uint16_t));
     xADCSemaphore    = xSemaphoreCreateBinary();
 
     xRotaryQueue     = xQueueCreate(20, sizeof(uint8_t));
