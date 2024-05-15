@@ -50,7 +50,7 @@ BankState = Welcome;
 
 void init_queues_semaphores() {
     // Queue with x elements of uint8_t-type + semaphore
-    xLCDQueue        = xQueueCreate(100, sizeof(uint8_t));
+    xLCDQueue        = xQueueCreate(140, sizeof(uint8_t));
     xLCDSemaphore    = xSemaphoreCreateBinary();
 
     xUARTQueue       = xQueueCreate(30, sizeof(uint8_t));
@@ -94,7 +94,7 @@ int main() {
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
     xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
-                NULL);
+                &xKeypadHandle);
 
     vTaskStartScheduler();
 

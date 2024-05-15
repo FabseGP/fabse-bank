@@ -37,6 +37,7 @@ extern SemaphoreHandle_t xUARTSemaphore;
 
 extern QueueHandle_t     xKeypadQueue;
 extern SemaphoreHandle_t xKeypadSemaphore;
+extern TaskHandle_t      xKeypadHandle;
 
 extern QueueHandle_t     xADCQueue;
 extern SemaphoreHandle_t xADCSemaphore;

@@ -119,7 +119,7 @@ void rotary_debouncer() {
         old_transition = new_transition;
     }
 
-    // Clears any previous interrupts on pin PF4 & PF0
+    // Clears any previous interrupts on pin PA5 & PA7
     GPIO_PORTA_ICR_R |= Clear_interrupt;
 }
 

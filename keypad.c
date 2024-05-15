@@ -29,6 +29,7 @@
 
 QueueHandle_t     xKeypadQueue;
 SemaphoreHandle_t xKeypadSemaphore;
+TaskHandle_t      xKeypadHandle;
 
 /*****************************   Constants   *******************************/
 
@@ -48,11 +49,14 @@ void keypad_scan() {
         GPIO_PORTA_DATA_R = (0x01 << i + 2);
         for (j = 0; j < 4; j++) {
             if (GPIO_PORTE_DATA_R & (0x01 << j)) {
-                vTaskDelay(200 / portTICK_RATE_MS);
+                vTaskDelay(150 / portTICK_RATE_MS);
                 xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                 xQueueSend(xKeypadQueue, &look_table[j][i], (TickType_t)10);
                 xSemaphoreGive(xKeypadSemaphore);
-                exit = 1;
+                while (GPIO_PORTE_DATA_R & (0x01 << j)) {
+                }
+                GPIO_PORTA_DATA_R = 0x00;
+                exit              = 1;
                 break;
             }
             if (exit == 1) {
