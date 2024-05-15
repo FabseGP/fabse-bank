@@ -25,7 +25,7 @@
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer {
-    Debounce_time   = 20,
+    Debounce_time   = 50,
     Clear_interrupt = 0x11,
     Clear           = 0,
     SW1             = 0x01,
