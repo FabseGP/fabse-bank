@@ -139,7 +139,7 @@ void lcd_task(void *pvParameters) {
                 if (data == '/') {
                     lcd_send(Bottom_line, Instruction);
                 } else if (data == '>') {
-                    vTaskDelay(2000 / portTICK_RATE_MS);
+                    vTaskDelay(1000 / portTICK_RATE_MS);
                     lcd_send(Clear, Instruction);
                 } else {
                     lcd_send(data, Output);
