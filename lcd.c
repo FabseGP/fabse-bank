@@ -131,21 +131,23 @@ void lcd_task(void *pvParameters) {
     lcd_send(Clear, Instruction);
     lcd_send(Entry, Instruction);
 
+    uint8_t data;
+
     while (1) {
-        uint8_t data;
-        if (xQueueReceive(xLCDQueue, &data, (TickType_t)10) == pdPASS) {
-            xSemaphoreTake(xLCDSemaphore, (TickType_t)10);
-            if (data == '/') {
-                lcd_send(Bottom_line, Instruction);
-            } else if (data == '>') {
-                vTaskDelay(2000 / portTICK_RATE_MS);
-                lcd_send(Clear, Instruction);
-            } else {
-                lcd_send(data, Output);
+        if (xSemaphoreTake(xLCDSemaphore, (TickType_t)10) == pdTRUE) {
+            while (xQueueReceive(xLCDQueue, &data, (TickType_t)10) == pdPASS) {
+                if (data == '/') {
+                    lcd_send(Bottom_line, Instruction);
+                } else if (data == '>') {
+                    vTaskDelay(2000 / portTICK_RATE_MS);
+                    lcd_send(Clear, Instruction);
+                } else {
+                    lcd_send(data, Output);
+                }
             }
-            xSemaphoreGive(xLCDSemaphore);
         }
     }
 }
 
-/****************************** End Of Module * *******************************/
+/****************************** End Of Module *
+ * *******************************/

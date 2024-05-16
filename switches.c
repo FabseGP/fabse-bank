@@ -110,11 +110,9 @@ void switch_debouncer() {
         if (debounce_counter == Debounce_time) {
             uint8_t button_press = 1;
             if (new_press & SW1) {
-                xSemaphoreTake(xSW1Semaphore, (TickType_t)10);
                 xQueueSend(xSW1Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW1Semaphore);
             } else if (new_press & SW2) {
-                xSemaphoreTake(xSW2Semaphore, (TickType_t)10);
                 xQueueSend(xSW2Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW2Semaphore);
             }
@@ -139,4 +137,5 @@ void switch_interrupt_handler() {
     switch_debouncer();
 }
 
-/****************************** End Of Module *******************************/
+/****************************** End Of Module
+ * *******************************/
