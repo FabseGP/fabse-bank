@@ -50,7 +50,6 @@ void keypad_scan() {
         for (j = 0; j < 4; j++) {
             if (GPIO_PORTE_DATA_R & (0x01 << j)) {
                 vTaskDelay(150 / portTICK_RATE_MS);
-                xSemaphoreTake(xKeypadSemaphore, (TickType_t)10);
                 xQueueSend(xKeypadQueue, &look_table[j][i], (TickType_t)10);
                 xSemaphoreGive(xKeypadSemaphore);
                 while (GPIO_PORTE_DATA_R & (0x01 << j)) {

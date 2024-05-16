@@ -107,7 +107,6 @@ void rotary_debouncer() {
             } else {
                 direction = 'R';
             }
-            xSemaphoreTake(xRotarySemaphore, (TickType_t)10);
             xQueueSend(xRotaryQueue, &direction, (TickType_t)10);
             xSemaphoreGive(xRotarySemaphore);
         }
