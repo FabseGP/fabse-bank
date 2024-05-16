@@ -26,7 +26,7 @@
 
 /*****************************    Defines    *******************************/
 
-enum States { Debounce_time = 100, Clear_interrupt = 0xA0, Clear = 0 };
+enum States { Debounce_time = 200, Clear_interrupt = 0xA0, Clear = 0 };
 
 QueueHandle_t     xRotaryQueue;
 SemaphoreHandle_t xRotarySemaphore;
@@ -102,7 +102,7 @@ void rotary_debouncer() {
             // Checks if PA5 and PA6 have the same state
             if ((new_transition & 0x20) && (new_transition & 0x40)) {
                 direction = 'L';
-            } else if (new_transition & 0x80) {
+            } else if (!(new_transition & 0x80)) {
                 direction = 'P';
             } else {
                 direction = 'R';
