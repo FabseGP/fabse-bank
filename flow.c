@@ -348,7 +348,6 @@ void flow_task(void *pvParameters) {
             case Welcome:
                 welcome();
                 BankState = Money;
-                //  vTaskResume(xKeypadHandle);
                 break;
             case Money:
                 balance();
@@ -357,7 +356,6 @@ void flow_task(void *pvParameters) {
             case Password:
                 security_code();
                 BankState = Withdraw;
-                //  vTaskSuspend(xKeypadHandle);
                 break;
             case Withdraw:
                 withdraw();
