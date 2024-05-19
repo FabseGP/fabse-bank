@@ -25,11 +25,11 @@
 /*****************************    Defines    *******************************/
 
 enum Sw1_debouncer {
-    Debounce_time   = 200,
+    Debounce_time   = 50,
     Clear_interrupt = 0x11,
     Clear           = 0,
-    SW1             = 0x01,
-    SW2             = 0x10
+    SW1             = 0x10,
+    SW2             = 0x01
 };
 
 QueueHandle_t     xSW1Queue, xSW2Queue;
@@ -109,10 +109,10 @@ void switch_debouncer() {
         new_press = GPIO_PORTF_DATA_R;
         if (debounce_counter == Debounce_time) {
             uint8_t button_press = 1;
-            if (new_press & SW1) {
+            if (new_press & ~(SW1)) {
                 xQueueSend(xSW1Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW1Semaphore);
-            } else if (new_press & SW2) {
+            } else if (new_press & ~(SW2)) {
                 xQueueSend(xSW2Queue, &button_press, (TickType_t)10);
                 xSemaphoreGive(xSW2Semaphore);
             }
@@ -137,5 +137,4 @@ void switch_interrupt_handler() {
     switch_debouncer();
 }
 
-/****************************** End Of Module
- * *******************************/
+/****************************** End Of Module ********************************/

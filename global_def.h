@@ -32,9 +32,6 @@
 extern QueueHandle_t     xLCDQueue;
 extern SemaphoreHandle_t xLCDSemaphore;
 
-extern QueueHandle_t     xUARTQueue;
-extern SemaphoreHandle_t xUARTSemaphore;
-
 extern QueueHandle_t     xKeypadQueue;
 extern SemaphoreHandle_t xKeypadSemaphore;
 extern TaskHandle_t      xKeypadHandle;
