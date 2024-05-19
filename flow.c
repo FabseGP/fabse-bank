@@ -40,7 +40,7 @@ uint16_t money, password, withdraw_amount, delay_timer;
 /*****************************   Functions   *******************************/
 
 void lcd_array_send(char data[]) {
-    char i;
+    uint8_t i;
     for (i = 0; i < strlen(data); i++) {
         xQueueSend(xLCDQueue, &data[i], (TickType_t)10);
     }
@@ -49,7 +49,7 @@ void lcd_array_send(char data[]) {
 
 void baka(char arr[]) {
     lcd_array_send(baka_text);
-    vTaskDelay(2000 / portTICK_RATE_MS);
+    vTaskDelay(1000 / portTICK_RATE_MS);
     lcd_array_send(arr);
 }
 
@@ -60,12 +60,11 @@ void welcome() {
 
     // "/" = new line, ">" = 2s delay + new screen
     char    fabse_text[] = ">Welcome to/Fabse's bank!>Come closer/Money awaits";
-    uint8_t running      = 1;
+    uint8_t running      = 1, button_press;
 
     lcd_array_send(fabse_text);
 
     while (running) {
-        uint8_t button_press;
         if (xSemaphoreTake(xSW1Semaphore, (TickType_t)10) == pdTRUE) {
             if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) ==
                 pdPASS) {
@@ -152,14 +151,12 @@ void security_code() {
 }
 
 void withdraw() {
-    uint8_t running = 1, state = 0, print_lcd = 1;
-    char    withdraw_text[] = ">Withdraw amount:/";
+    uint8_t running = 1, state = 0, print_lcd = 1, button_press, double_press;
+    char    withdraw_text[] = ">Withdraw amount:/", amount[6];
 
     lcd_array_send(withdraw_text);
 
     while (running) {
-        uint8_t button_press, double_press;
-        char    amount[6];
         if (print_lcd == 1) {
             switch (state) {
                 case 0:
@@ -194,20 +191,23 @@ void withdraw() {
                 }
                 print_lcd = 1;
             }
+            xQueueReset(xSW1Queue);
         }
 
         if (xSemaphoreTake(xSW2Semaphore, (TickType_t)10) == pdTRUE) {
             if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
                 pdPASS) {
                 vTaskDelay(200 / portTICK_RATE_MS);
-                if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
-                    pdPASS) {
-                    if (money < withdraw_amount) {
-                        baka(withdraw_text);
-                        print_lcd = 1;
-                    } else {
-                        lcd_array_send(congratulations);
-                        running = 0;
+                if (xSemaphoreTake(xSW2Semaphore, (TickType_t)10) == pdTRUE) {
+                    if (xQueueReceive(xSW2Queue, &double_press,
+                                      (TickType_t)10) == pdPASS) {
+                        if (money < withdraw_amount) {
+                            baka(withdraw_text);
+                            print_lcd = 1;
+                        } else {
+                            lcd_array_send(congratulations);
+                            running = 0;
+                        }
                     }
                 } else {
                     if (state == 0) {
@@ -218,6 +218,7 @@ void withdraw() {
                     print_lcd = 1;
                 }
             }
+            xQueueReset(xSW2Queue);
         }
     }
 }
@@ -227,13 +228,12 @@ void coinage() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t running = 1, state = 0, print_lcd = 1;
-    char    coinage_text[] = ">Withdraw type:/";
+    uint8_t running = 1, state = 0, print_lcd     = 1;
+    char    rotary_event, type[7], coinage_text[] = ">Withdraw type:/";
 
     lcd_array_send(coinage_text);
 
     while (running) {
-        char rotary_event, type[7], double_press;
         if (print_lcd == 1) {
             switch (state) {
                 case 0:
@@ -304,14 +304,15 @@ void print_money() {
      *****************************************************************************/
 
     // "/" = new line, ">" = 2s delay + new screen
-    char    print_text[] = ">Stay calm/Printing money";
-    uint8_t running      = 1;
+    char     print_text[] = ">Stay calm/Printing money";
+    uint8_t  running      = 1;
+    uint16_t adc_value;
 
     lcd_array_send(print_text);
-    vTaskDelay(5000 / portTICK_RATE_MS);
+    vTaskDelay(2000 / portTICK_RATE_MS);
     withdraw_amount *= 2;
     while (running) {
-        uint16_t adc_value = get_adc();
+        adc_value = get_adc();
         withdraw_amount -= withdraw_type;
         GPIO_PORTF_DATA_R ^= blink_led;
         vTaskDelay(delay_timer / portTICK_RATE_MS);
@@ -319,7 +320,7 @@ void print_money() {
         if (withdraw_amount == 0) {
             char next_customer[] = ">Money withdrawn/Now move aside!";
             lcd_array_send(next_customer);
-            vTaskDelay(5000 / portTICK_RATE_MS);
+            vTaskDelay(3000 / portTICK_RATE_MS);
             running = 0;
         }
     }

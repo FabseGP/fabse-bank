@@ -31,7 +31,6 @@
 #include "systick_frt.h"
 #include "task.h"
 #include "tm4c123gh6pm.h"
-#include "uart.h"
 
 /*****************************    Defines    *******************************/
 
@@ -53,9 +52,6 @@ void init_queues_semaphores() {
     xLCDQueue        = xQueueCreate(140, sizeof(uint8_t));
     xLCDSemaphore    = xSemaphoreCreateBinary();
 
-    xUARTQueue       = xQueueCreate(30, sizeof(uint8_t));
-    xUARTSemaphore   = xSemaphoreCreateBinary();
-
     xKeypadQueue     = xQueueCreate(30, sizeof(uint8_t));
     xKeypadSemaphore = xSemaphoreCreateBinary();
 
@@ -72,7 +68,6 @@ void init_queues_semaphores() {
     xSW2Semaphore    = xSemaphoreCreateBinary();
 
     xSemaphoreGive(xLCDSemaphore);
-    xSemaphoreGive(xUARTSemaphore);
     xSemaphoreGive(xKeypadSemaphore);
     xSemaphoreGive(xADCSemaphore);
     xSemaphoreGive(xRotarySemaphore);
@@ -90,7 +85,6 @@ int main() {
     init_queues_semaphores();
 
     xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
-    xTaskCreate(uart0_task, "UART", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
     xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
