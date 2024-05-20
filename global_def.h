@@ -34,10 +34,6 @@ extern SemaphoreHandle_t xLCDSemaphore;
 
 extern QueueHandle_t     xKeypadQueue;
 extern SemaphoreHandle_t xKeypadSemaphore;
-extern TaskHandle_t      xKeypadHandle;
-
-extern QueueHandle_t     xADCQueue;
-extern SemaphoreHandle_t xADCSemaphore;
 
 extern QueueHandle_t     xRotaryQueue;
 extern SemaphoreHandle_t xRotarySemaphore;
@@ -62,11 +58,9 @@ enum BankState {
     Withdraw,
     Coinage,
     Print_money,
-
-    TotalStates
 };
 
-extern int BankState; //
+extern int BankState;
 
 /*****************************   Functions   *******************************/
 

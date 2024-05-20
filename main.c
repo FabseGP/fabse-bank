@@ -55,9 +55,6 @@ void init_queues_semaphores() {
     xKeypadQueue     = xQueueCreate(30, sizeof(uint8_t));
     xKeypadSemaphore = xSemaphoreCreateBinary();
 
-    xADCQueue        = xQueueCreate(30, sizeof(uint16_t));
-    xADCSemaphore    = xSemaphoreCreateBinary();
-
     xRotaryQueue     = xQueueCreate(30, sizeof(uint8_t));
     xRotarySemaphore = xSemaphoreCreateBinary();
 
@@ -69,7 +66,6 @@ void init_queues_semaphores() {
 
     xSemaphoreGive(xLCDSemaphore);
     xSemaphoreGive(xKeypadSemaphore);
-    xSemaphoreGive(xADCSemaphore);
     xSemaphoreGive(xRotarySemaphore);
     xSemaphoreGive(xSW1Semaphore);
     xSemaphoreGive(xSW2Semaphore);
@@ -84,11 +80,12 @@ int main() {
     init_rotary();
     init_queues_semaphores();
 
-    xTaskCreate(lcd_task, "LCD", USERTASK_STACK_SIZE, NULL, Low_prio, NULL);
+    xTaskCreate(lcd_task, "LCD_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+                NULL);
     xTaskCreate(flow_task, "flow_task", USERTASK_STACK_SIZE, NULL, Low_prio,
                 NULL);
-    xTaskCreate(keypad_task, "Keypad", USERTASK_STACK_SIZE, NULL, Low_prio,
-                &xKeypadHandle);
+    xTaskCreate(keypad_task, "keypad_task", USERTASK_STACK_SIZE, NULL, Low_prio,
+                NULL);
 
     vTaskStartScheduler();
 

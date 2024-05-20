@@ -31,34 +31,42 @@ QueueHandle_t     xKeypadQueue;
 SemaphoreHandle_t xKeypadSemaphore;
 TaskHandle_t      xKeypadHandle;
 
+enum Keypad_size {
+    Rows = 4,
+    Cols = 3,
+};
+
+enum Defines {
+    Clear = 0,
+    False = 0,
+    True  = 1,
+};
+
 /*****************************   Constants   *******************************/
+
+char lookup_table[Rows][Cols] = {
+    {'#', '0', '*'}, {'9', '8', '7'}, {'6', '5', '4'}, {'3', '2', '1'}};
 
 /*****************************   Variables   *******************************/
 
 /*****************************   Functions   *******************************/
 
-#define RowsSize 4
-#define ColsSize 3
-
-char look_table[RowsSize][ColsSize] = {
-    {'#', '0', '*'}, {'9', '8', '7'}, {'6', '5', '4'}, {'3', '2', '1'}};
-
 void keypad_scan() {
-    uint8_t exit = 0, i, j;
+    uint8_t exit = False, i, j;
     for (i = 0; i < 3; i++) {
         GPIO_PORTA_DATA_R = (0x01 << i + 2);
         for (j = 0; j < 4; j++) {
             if (GPIO_PORTE_DATA_R & (0x01 << j)) {
                 vTaskDelay(150 / portTICK_RATE_MS);
-                xQueueSend(xKeypadQueue, &look_table[j][i], (TickType_t)10);
+                xQueueSend(xKeypadQueue, &lookup_table[j][i], (TickType_t)10);
                 xSemaphoreGive(xKeypadSemaphore);
                 while (GPIO_PORTE_DATA_R & (0x01 << j)) {
                 }
-                GPIO_PORTA_DATA_R = 0x00;
-                exit              = 1;
+                GPIO_PORTA_DATA_R = Clear;
+                exit              = True;
                 break;
             }
-            if (exit == 1) {
+            if (exit == True) {
                 break;
             }
         }
