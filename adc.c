@@ -33,6 +33,7 @@ SemaphoreHandle_t xADCSemaphore;
 
 enum Adc {
     Clear_interrupt = 0x08,
+    Clear           = 0,
 };
 
 /*****************************   Variables   *******************************/
@@ -68,7 +69,7 @@ void init_adc() {
     ADC0_SSPRI_R = 0x00000123;
 
     // Disable all sequencers
-    ADC0_ACTSS_R = 0;
+    ADC0_ACTSS_R = Clear;
 
     // Trigger for Sequencer 3 (bit 12-15) = 0xF = Always
     ADC0_EMUX_R = 0x0000F000;
@@ -94,20 +95,6 @@ void init_adc() {
 
     // Start conversion at sequencer 3
     ADC0_PSSI_R = 0x08;
-}
-
-void adc0_interrupt_handler() {
-    /*****************************************************************************
-     *   Function : See module specification (.h-file)
-     *****************************************************************************/
-
-    xSemaphoreTake(xADCSemaphore, (TickType_t)10);
-    uint16_t adc_value = ADC0_SSFIFO3_R;
-    xQueueSend(xADCQueue, &adc_value, (TickType_t)10);
-    xSemaphoreGive(xADCSemaphore);
-
-    // Clears any previous interrupts on ADC0
-    ADC0_ISC_R |= Clear_interrupt;
 }
 
 /****************************** End Of Module *******************************/

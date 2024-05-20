@@ -32,6 +32,33 @@
 char congratulations[] = ">You succeeded!",
      baka_text[]       = ">Why you dumb...?/Try again!";
 
+enum States {
+    Withdraw_500 = 0,
+    Withdraw_200 = 1,
+    Withdraw_100 = 2,
+    Withdraw_50  = 3,
+
+    Coinage_100  = 0,
+    Coinage_50   = 1,
+    Coinage_10   = 2,
+};
+
+enum Leds {
+    Red     = 0x02,
+    Yellow  = 0x04,
+    Green   = 0x08,
+
+    One_hz  = 1000,
+    Two_hz  = 500,
+    Four_hz = 250,
+};
+
+enum Defines {
+    Clear = 0,
+    False = 0,
+    True  = 1,
+};
+
 /*****************************   Variables   *******************************/
 
 uint8_t  withdraw_type, blink_led;
@@ -60,7 +87,7 @@ void welcome() {
 
     // "/" = new line, ">" = 2s delay + new screen
     char    fabse_text[] = ">Welcome to/Fabse's bank!>Come closer/Money awaits";
-    uint8_t running      = 1, button_press;
+    uint8_t running      = True, button_press;
 
     lcd_array_send(fabse_text);
 
@@ -68,7 +95,7 @@ void welcome() {
         if (xSemaphoreTake(xSW1Semaphore, (TickType_t)10) == pdTRUE) {
             if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) ==
                 pdPASS) {
-                running = 0;
+                running = False;
             }
         }
     }
@@ -79,7 +106,7 @@ void balance() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t running = 1, index      = 0;
+    uint8_t running = True, index   = Clear;
     char    amount[4], money_text[] = ">Please enter/balance: ";
 
     lcd_array_send(money_text);
@@ -89,10 +116,10 @@ void balance() {
             money = atoi(amount);
             if (money > 50 && money <= 9999) {
                 lcd_array_send(congratulations);
-                running = 0;
+                running = False;
             } else {
                 baka(money_text);
-                index = 0;
+                index = Clear;
             }
         } else {
             if (xSemaphoreTake(xKeypadSemaphore, (TickType_t)10) == pdTRUE) {
@@ -100,7 +127,7 @@ void balance() {
                                   (TickType_t)10) == pdPASS) {
                     if (amount[index] == '#' || amount[index] == '*') {
                         baka(money_text);
-                        index = 0;
+                        index = Clear;
                     } else {
                         xQueueSend(xLCDQueue, &amount[index], (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
@@ -117,7 +144,7 @@ void security_code() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t running = 1, index           = 0;
+    uint8_t running = True, index        = Clear;
     char    security[4], security_text[] = ">Please enter/password: ";
 
     lcd_array_send(security_text);
@@ -127,10 +154,10 @@ void security_code() {
             password = atoi(security);
             if (password % 8 == 0) {
                 lcd_array_send(congratulations);
-                running = 0;
+                running = False;
             } else {
                 baka(security_text);
-                index = 0;
+                index = Clear;
             }
         } else {
             if (xSemaphoreTake(xKeypadSemaphore, (TickType_t)10) == pdTRUE) {
@@ -138,7 +165,7 @@ void security_code() {
                                   (TickType_t)10) == pdPASS) {
                     if (security[index] == '#' || security[index] == '*') {
                         baka(security_text);
-                        index = 0;
+                        index = Clear;
                     } else {
                         xQueueSend(xLCDQueue, &security[index], (TickType_t)10);
                         xSemaphoreGive(xLCDSemaphore);
@@ -151,27 +178,28 @@ void security_code() {
 }
 
 void withdraw() {
-    uint8_t running = 1, state = 0, print_lcd = 1, button_press, double_press;
-    char    withdraw_text[] = ">Withdraw amount:/", amount[6];
+    uint8_t running = True, state = 0, print_lcd = True, button_press,
+            double_press;
+    char withdraw_text[] = ">Withdraw amount:/", amount[6];
 
     lcd_array_send(withdraw_text);
 
     while (running) {
-        if (print_lcd == 1) {
+        if (print_lcd == True) {
             switch (state) {
-                case 0:
+                case Withdraw_500:
                     strcpy(amount, "/500 kr");
                     withdraw_amount = 500;
                     break;
-                case 1:
+                case Withdraw_200:
                     strcpy(amount, "/200 kr");
                     withdraw_amount = 200;
                     break;
-                case 2:
+                case Withdraw_100:
                     strcpy(amount, "/100 kr");
                     withdraw_amount = 100;
                     break;
-                case 3:
+                case Withdraw_50:
                     strcpy(amount, "/50 kr ");
                     withdraw_amount = 50;
                     break;
@@ -179,13 +207,14 @@ void withdraw() {
                     break;
             }
             lcd_array_send(amount);
-            print_lcd = 0;
+            print_lcd = False;
         }
+
         if (xSemaphoreTake(xSW1Semaphore, (TickType_t)10) == pdTRUE) {
             if (xQueueReceive(xSW1Queue, &button_press, (TickType_t)10) ==
                 pdPASS) {
                 if (state >= 3) {
-                    state = 0;
+                    state = Clear;
                 } else {
                     state++;
                 }
@@ -198,16 +227,14 @@ void withdraw() {
             if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
                 pdPASS) {
                 vTaskDelay(200 / portTICK_RATE_MS);
-                if (xSemaphoreTake(xSW2Semaphore, (TickType_t)10) == pdTRUE) {
-                    if (xQueueReceive(xSW2Queue, &double_press,
-                                      (TickType_t)10) == pdPASS) {
-                        if (money < withdraw_amount) {
-                            baka(withdraw_text);
-                            print_lcd = 1;
-                        } else {
-                            lcd_array_send(congratulations);
-                            running = 0;
-                        }
+                if (xQueueReceive(xSW2Queue, &double_press, (TickType_t)10) ==
+                    pdPASS) {
+                    if (money < withdraw_amount) {
+                        baka(withdraw_text);
+                        print_lcd = True;
+                    } else {
+                        lcd_array_send(congratulations);
+                        running = False;
                     }
                 } else {
                     if (state == 0) {
@@ -228,37 +255,37 @@ void coinage() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t running = 1, state = 0, print_lcd     = 1;
+    uint8_t running = True, state = 0, print_lcd  = True;
     char    rotary_event, type[7], coinage_text[] = ">Withdraw type:/";
 
     lcd_array_send(coinage_text);
 
     while (running) {
-        if (print_lcd == 1) {
+        if (print_lcd == True) {
             switch (state) {
-                case 0:
+                case Coinage_100:
                     strcpy(type, "/100 kr");
                     withdraw_type = 100;
-                    delay_timer   = 1000;
-                    blink_led     = 0x02;
+                    delay_timer   = One_hz;
+                    blink_led     = Red;
                     break;
-                case 1:
+                case Coinage_50:
                     strcpy(type, "/50 kr ");
                     withdraw_type = 50;
-                    delay_timer   = 500;
-                    blink_led     = 0x04;
+                    delay_timer   = Two_hz;
+                    blink_led     = Yellow;
                     break;
-                case 2:
+                case Coinage_10:
                     strcpy(type, "/10 kr ");
                     withdraw_type = 10;
-                    delay_timer   = 250;
-                    blink_led     = 0x08;
+                    delay_timer   = Four_hz;
+                    blink_led     = Green;
                     break;
                 default:
                     break;
             }
             lcd_array_send(type);
-            print_lcd = 0;
+            print_lcd = False;
         }
 
         if (xSemaphoreTake(xRotarySemaphore, (TickType_t)10) == pdTRUE) {
@@ -266,28 +293,28 @@ void coinage() {
                 pdPASS) {
                 switch (rotary_event) {
                     case 'R':
-                        if (state < 2) {
+                        if (state < Coinage_10) {
                             state++;
                         } else {
-                            state = 0;
+                            state = Coinage_100;
                         }
-                        print_lcd = 1;
+                        print_lcd = True;
                         break;
                     case 'L':
-                        if (state > 0 && state <= 2) {
+                        if (state > Coinage_100 && state <= Coinage_10) {
                             state--;
                         } else {
-                            state = 2;
+                            state = Coinage_10;
                         }
-                        print_lcd = 1;
+                        print_lcd = True;
                         break;
                     case 'P':
                         if (withdraw_amount % withdraw_type == 0) {
                             lcd_array_send(congratulations);
-                            running = 0;
+                            running = False;
                         } else {
                             baka(coinage_text);
-                            print_lcd = 1;
+                            print_lcd = True;
                         }
                         break;
                     default:
@@ -305,12 +332,12 @@ void print_money() {
 
     // "/" = new line, ">" = 2s delay + new screen
     char     print_text[] = ">Stay calm/Printing money";
-    uint8_t  running      = 1;
+    uint8_t  running      = True;
     uint16_t adc_value;
 
     lcd_array_send(print_text);
     vTaskDelay(2000 / portTICK_RATE_MS);
-    withdraw_amount *= 2;
+    withdraw_amount *= True;
     while (running) {
         adc_value = get_adc();
         withdraw_amount -= withdraw_type;
@@ -321,7 +348,7 @@ void print_money() {
             char next_customer[] = ">Money withdrawn/Now move aside!";
             lcd_array_send(next_customer);
             vTaskDelay(3000 / portTICK_RATE_MS);
-            running = 0;
+            running = False;
         }
     }
 }

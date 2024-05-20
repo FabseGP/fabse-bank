@@ -92,7 +92,7 @@ void rotary_debouncer() {
      *   Function : See module specification (.h-file)
      *****************************************************************************/
 
-    uint8_t debounce_counter = 0, old_transition = GPIO_PORTA_DATA_R,
+    uint8_t debounce_counter = Clear, old_transition = GPIO_PORTA_DATA_R,
             new_transition;
 
     while (debounce_counter <= Debounce_time) {
